@@ -52,7 +52,7 @@
             padding-bottom: 15px;
         }
 
-        .header h1 { margin: 0; font-size: 1.5rem; } /* Slightly smaller font for long title */
+        .header h1 { margin: 0; font-size: 1.5rem; } 
         .header span { font-size: 0.9rem; opacity: 0.7; }
 
         /* Controls Area */
@@ -150,6 +150,8 @@
         <input type="number" id="rows" placeholder="Rows" value="10" style="width: 80px;" title="Rows (Y)">
         <input type="number" id="cols" placeholder="Cols" value="10" style="width: 80px;" title="Cols (X)">
         
+        <input type="number" id="lineWidth" placeholder="Width" value="1" min="1" style="width: 80px;" title="Line Width (px)">
+
         <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
 
         <button onclick="drawGrid()">Update Grid</button>
@@ -191,8 +193,11 @@
             reader.readAsDataURL(file);
         });
 
-        // 1.5 Auto-update when color changes
+        // 1.5 Auto-update when inputs change
         document.getElementById('gridColor').addEventListener('input', drawGrid);
+        document.getElementById('lineWidth').addEventListener('input', drawGrid);
+        document.getElementById('rows').addEventListener('input', drawGrid);
+        document.getElementById('cols').addEventListener('input', drawGrid);
 
         // 2. Draw Grid Logic
         function drawGrid() {
@@ -201,6 +206,7 @@
             // Get input values
             const rows = parseInt(document.getElementById('rows').value) || 10;
             const cols = parseInt(document.getElementById('cols').value) || 10;
+            const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; // Get Line Width
             const color = document.getElementById('gridColor').value; 
             
             // Resize canvas to match the image size
@@ -212,7 +218,7 @@
             
             // Setup Line Style
             ctx.strokeStyle = color; 
-            ctx.lineWidth = Math.max(1, currentImg.width / 500); 
+            ctx.lineWidth = widthVal; // Use the specific pixel value from input
 
             // Draw Horizontal Lines
             const rowH = canvas.height / rows;
@@ -238,10 +244,19 @@
             if(!currentImg) return alert("Please upload an image first!");
             
             const link = document.createElement('a');
-            // Updated filename to match project vibe
             link.download = 'grid-generated-image.png';
             link.href = canvas.toDataURL();
             link.click();
+        }
+
+        // Optional: Include toggleTheme logic if theme.js is missing
+        if (typeof toggleTheme !== 'function') {
+            function toggleTheme() {
+                const body = document.body;
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                body.setAttribute('data-theme', newTheme);
+            }
         }
     </script>
 </body>
