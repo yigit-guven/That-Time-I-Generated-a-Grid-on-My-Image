@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>That Time I Generated a Grid on My Image</title>
     
     <script>
-        // Inline Theme Script to prevent flash of wrong theme
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -17,934 +16,1025 @@
     </script>
 
     <style>
-        /* --- 1. Modern CSS Variables (High Contrast) --- */
+        /* --- CORE VARS --- */
         :root {
-            /* Light Theme */
-            --bg-body: #eef2f5;
-            --bg-card: #ffffff;
+            --bg-app: #f0f2f5;
+            --bg-panel: #ffffff;
             --bg-input: #f8f9fa;
-            --text-main: #212529;
-            --text-muted: #6c757d;
-            --border: #ced4da;
-            --primary: #0d6efd;
-            --primary-hover: #0b5ed7;
-            --danger: #dc3545;
-            --success: #198754;
-            --warning: #ffc107;
-            --shadow: rgba(0, 0, 0, 0.08);
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+            --primary: #6c5ce7;
+            --primary-hover: #5849c2;
+            --accent: #00b894;
+            --danger: #d63031;
             --radius: 6px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --header-height: 50px;
         }
 
         [data-theme="dark"] {
-            /* Dark Theme */
-            --bg-body: #121212;
-            --bg-card: #1e1e1e;
-            --bg-input: #2d2d2d;
-            --text-main: #e9ecef;
-            --text-muted: #adb5bd;
-            --border: #495057;
-            --primary: #3d8bfd;
-            --primary-hover: #5c9eff;
-            --danger: #e35d6a;
-            --success: #2ecc71;
-            --warning: #ffca2c;
-            --shadow: rgba(0, 0, 0, 0.3);
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --bg-input: #333333;
+            --text-main: #dfe6e9;
+            --text-muted: #b2bec3;
+            --border: #3f3f46;
+            --primary: #74b9ff;
+            --primary-hover: #0984e3;
+            --accent: #55efc4;
+            --danger: #ff7675;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* --- 2. Base Styles --- */
+        /* --- RESET & LAYOUT --- */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            transition: background-color 0.2s, color 0.2s;
+            overflow: hidden;
         }
 
-        a { color: var(--primary); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        * { box-sizing: border-box; }
 
-        /* --- 3. Layout Components --- */
-        .header {
-            width: 100%;
-            max-width: 1100px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        /* --- APP STRUCTURE --- */
+        .app-header {
+            height: var(--header-height);
+            background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
         }
 
-        .header-content h1 { margin: 0 0 5px 0; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
-        .header-content p { margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 600px; line-height: 1.4; }
-
-        .container {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 1250px;
-            align-items: start;
+        .app-header h1 {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
-        @media (max-width: 950px) {
-            .container { grid-template-columns: 1fr; }
-            .header { flex-direction: column; gap: 15px; }
+        .app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
 
-        /* --- 4. Sidebar / Controls --- */
+        /* --- SIDEBAR --- */
         .sidebar {
+            width: 320px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 5;
+        }
+
+        .sidebar-content {
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .card {
-            background: var(--bg-card);
+        /* --- PANELS & ACCORDIONS --- */
+        .panel {
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 15px;
-            box-shadow: 0 2px 8px var(--shadow);
-            position: relative;
+            background: var(--bg-panel);
+            overflow: hidden;
         }
 
-        .card h3 {
-            margin: 0 0 12px 0;
+        .panel-header {
+            padding: 10px 12px;
+            background: var(--bg-input);
             font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--primary);
+            font-weight: 600;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            user-select: none;
         }
+        
+        .panel-header:hover { background: var(--border); }
+        .panel-header::after { content: '▼'; font-size: 0.7rem; opacity: 0.5; }
+        .panel.collapsed .panel-header::after { content: '◀'; }
+        .panel.collapsed .panel-body { display: none; }
 
-        .input-group { margin-bottom: 12px; }
-        .input-group label {
+        .panel-body { padding: 12px; }
+
+        /* --- CONTROLS --- */
+        .control-group { margin-bottom: 10px; }
+        .control-group:last-child { margin-bottom: 0; }
+        
+        label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--text-main);
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .row { display: flex; gap: 8px; }
-        .row > * { flex: 1; }
+        .row { display: flex; gap: 8px; align-items: center; }
+        .col { flex: 1; }
 
         input[type="text"], input[type="number"], select {
             width: 100%;
-            padding: 8px;
+            padding: 6px 8px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-main);
             border-radius: 4px;
-            font-size: 0.9rem;
-            box-sizing: border-box;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        input[type="number"]:focus, select:focus {
-            outline: 2px solid var(--primary);
-            border-color: transparent;
+            font-size: 0.85rem;
         }
 
         input[type="range"] {
             width: 100%;
-            cursor: pointer;
             accent-color: var(--primary);
+            height: 4px;
+            margin: 8px 0;
         }
 
         input[type="color"] {
+            -webkit-appearance: none;
             width: 100%;
-            height: 35px;
+            height: 30px;
             border: 1px solid var(--border);
-            background: none;
-            cursor: pointer;
             padding: 0;
+            background: none;
             border-radius: 4px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            font-size: 0.85rem;
             cursor: pointer;
-            user-select: none;
         }
-        .checkbox-label input { margin-right: 8px; width: auto; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+        input[type="color"]::-webkit-color-swatch { border-radius: 2px; border: none; }
 
-        /* --- 5. Buttons --- */
-        button {
-            padding: 10px 16px;
+        /* --- BUTTONS --- */
+        .btn {
             border: none;
+            padding: 8px 12px;
             border-radius: 4px;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
+            transition: all 0.2s;
+            text-align: center;
         }
-        button:active { transform: translateY(1px); }
-        button:hover { opacity: 0.95; }
 
-        .btn-primary { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
+        .btn-block { width: 100%; display: flex; }
+        .btn-sm { padding: 4px 8px; font-size: 0.75rem; }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
         .btn-secondary { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); }
-        .btn-success { background: var(--success); color: white; width: 100%; }
-        .btn-warning { background: var(--warning); color: #000; width: 100%; }
-        .btn-danger-outline { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: 100%; }
-        .btn-danger-outline:hover { background: var(--danger); color: white; }
-        
-        .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
-        .btn-icon { padding: 6px; aspect-ratio: 1; }
+        .btn-secondary:hover { border-color: var(--text-muted); }
 
-        /* Locked State for Button */
-        .locked-active {
-            background-color: var(--warning);
-            color: black;
-            border-color: var(--warning);
-        }
+        .btn-accent { background: var(--accent); color: #000; }
+        .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
 
-        /* --- 6. Canvas Area --- */
-        .canvas-wrapper {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0;
+        .btn-toggle { opacity: 0.5; }
+        .btn-toggle.active { opacity: 1; border-color: var(--primary); background: rgba(108, 92, 231, 0.1); color: var(--primary); }
+
+        /* --- VIEWPORT --- */
+        .viewport {
+            flex: 1;
+            position: relative;
+            background-color: #2d2d2d; /* Always dark for viewport area */
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 600px;
-            height: calc(100vh - 150px);
-            max-height: 800px;
-            overflow: hidden; /* Canvas handles scroll/zoom internally mostly */
-            position: relative;
-        }
-        
-        /* Background variants */
-        .bg-checkers {
             background-image:
-                linear-gradient(45deg, #ccc 25%, transparent 25%),
-                linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #ccc 75%),
-                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+                linear-gradient(45deg, #333 25%, transparent 25%),
+                linear-gradient(-45deg, #333 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #333 75%),
+                linear-gradient(-45deg, transparent 75%, #333 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
-        .bg-white { background: #ffffff; }
-        .bg-dark { background: #222222; }
 
         canvas {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             cursor: grab;
-            max-width: 100%;
-            max-height: 100%;
-            image-rendering: auto; /* Default smooth */
+            max-width: none; /* Allow canvas to exceed viewport for zoom */
         }
-        
-        canvas.pixelated {
-            image-rendering: pixelated; /* Chrome/Opera */
-            image-rendering: crisp-edges; /* Firefox */
-        }
-        
         canvas:active { cursor: grabbing; }
-        canvas.locked { cursor: default; }
 
-        .overlay-controls {
+        /* --- FLOATING CONTROLS --- */
+        .floating-toolbar {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            padding: 6px;
+            border-radius: 50px;
             display: flex;
             gap: 5px;
-            background: var(--bg-card);
-            padding: 5px;
-            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             border: 1px solid var(--border);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        /* --- 7. Footer --- */
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+        .drop-zone {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(108, 92, 231, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .drop-zone.active { opacity: 1; pointer-events: all; }
+
+        /* --- FOOTER --- */
+        .footer-sidebar {
+            margin-top: auto;
+            padding: 15px;
             border-top: 1px solid var(--border);
-            padding-top: 20px;
-            width: 100%;
-            max-width: 1100px;
-            padding-bottom: 20px;
-        }
-        .footer-links { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap;}
-
-        .hidden { display: none; }
-        
-        .kbd-hint {
-            display: inline-block;
-            padding: 2px 6px;
             font-size: 0.7rem;
-            font-family: monospace;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 4px;
             color: var(--text-muted);
+            text-align: center;
+            background: var(--bg-input);
         }
+        .footer-sidebar a { color: var(--primary); text-decoration: none; }
+        .footer-sidebar a:hover { text-decoration: underline; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-content">
-            <h1>That Time I Generated a Grid on My Image</h1>
-            <p>A lightweight, privacy-focused tool for artists. Overlay customizable grids, check composition with diagonals, and prepare references. Runs 100% in your browser.</p>
-        </div>
-        <div>
-            <button class="btn-secondary" onclick="toggleTheme()">🌗 Theme</button>
-        </div>
-    </div>
+    <div id="dropZone" class="drop-zone">Drop Image Here</div>
 
-    <div class="container">
-        <div class="sidebar">
+    <header class="app-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.5rem;"></span>
+            <div>
+                <h1>That Time I Generated a Grid on My Image</h1>
+                <span style="font-size:0.7rem; color:var(--text-muted);">A lightweight, client-side tool to overlay customizable grids on images. Built with HTML5 and the Canvas API; runs entirely in the browser.</span>
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn btn-secondary btn-sm" onclick="triggerUpload()">📂 Open</button>
+            <input type="file" id="fileInput" accept="image/*" class="hidden">
+            <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">🌗</button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        
+        <aside class="sidebar">
+            <div class="sidebar-content">
+
+                <div class="panel">
+                    <div class="panel-header" onclick="togglePanel(this)">Image & Adjustments</div>
+                    <div class="panel-body">
+                        <div class="control-group">
+                            <label>Transform</label>
+                            <div class="row">
+                                <button class="btn btn-secondary btn-sm col" onclick="rotateImage(90)">↻ 90°</button>
+                                <button class="btn btn-secondary btn-sm col" onclick="flipImage('h')">↔ Flip H</button>
+                                <button class="btn btn-secondary btn-sm col" onclick="flipImage('v')">↕ Flip V</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Filters</label>
+                            <div class="row" style="margin-bottom:5px;">
+                                <span style="font-size:0.7rem; width: 60px;">Grayscale</span>
+                                <input type="range" id="filterGray" min="0" max="100" value="0">
+                            </div>
+                            <div class="row" style="margin-bottom:5px;">
+                                <span style="font-size:0.7rem; width: 60px;">Contrast</span>
+                                <input type="range" id="filterContrast" min="50" max="150" value="100">
+                            </div>
+                            <div class="row">
+                                <span style="font-size:0.7rem; width: 60px;">Bright</span>
+                                <input type="range" id="filterBrightness" min="50" max="150" value="100">
+                            </div>
+                            <button class="btn btn-secondary btn-sm btn-block" style="margin-top:5px;" onclick="resetFilters()">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header" onclick="togglePanel(this)">Main Grid</div>
+                    <div class="panel-body">
+                        <div class="control-group">
+                            <div class="row">
+                                <select id="gridType" class="col" onchange="updateUIFromState()">
+                                    <option value="standard">Standard (Square)</option>
+                                    <option value="isometric">Isometric (30°)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Mode</label>
+                            <div class="row">
+                                <button class="btn btn-secondary btn-sm col active" id="btnModeCount" onclick="setGridMode('count')">Count (R/C)</button>
+                                <button class="btn btn-secondary btn-sm col" id="btnModeSize" onclick="setGridMode('size')">Px Size</button>
+                            </div>
+                        </div>
+
+                        <div id="inputsCount" class="control-group row">
+                            <div class="col">
+                                <label>Rows</label>
+                                <input type="number" id="gridRows" value="8" min="1">
+                            </div>
+                            <div class="col">
+                                <label>Cols</label>
+                                <input type="number" id="gridCols" value="8" min="1">
+                            </div>
+                        </div>
+
+                        <div id="inputsSize" class="control-group hidden">
+                            <label>Cell Size (px)</label>
+                            <input type="number" id="gridCellSize" value="100" min="2">
+                        </div>
+
+                        <div class="control-group row">
+                            <div class="col">
+                                <label>Color</label>
+                                <input type="color" id="gridColor" value="#ff0000">
+                            </div>
+                            <div class="col">
+                                <label>Thickness</label>
+                                <input type="number" id="gridThick" value="2" step="0.5" min="0.5">
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                             <label>Opacity</label>
+                             <input type="range" id="gridOpacity" min="0" max="1" step="0.1" value="1">
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display:flex; align-items:center;">
+                                <input type="checkbox" id="showLabels" checked style="margin-right:5px;"> Show Labels (A1, B2)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header" onclick="togglePanel(this)">Sub-Divisions</div>
+                    <div class="panel-body">
+                         <div class="control-group">
+                            <label style="display:flex; align-items:center;">
+                                <input type="checkbox" id="enableSubGrid" onchange="toggleSubInputs()"> Enable Sub-Grid
+                            </label>
+                         </div>
+                         <div id="subGridControls" class="hidden">
+                             <div class="control-group">
+                                 <label>Divisions per Cell</label>
+                                 <input type="number" id="subGridDivs" value="4" min="2">
+                             </div>
+                             <div class="control-group row">
+                                <div class="col">
+                                    <label>Color</label>
+                                    <input type="color" id="subGridColor" value="#ffffff">
+                                </div>
+                                <div class="col">
+                                    <label>Opacity</label>
+                                    <input type="number" id="subGridOpacity" value="0.5" step="0.1" max="1" min="0">
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header" onclick="togglePanel(this)">Guides & Overlays</div>
+                    <div class="panel-body">
+                        <div class="control-group">
+                            <button class="btn btn-secondary btn-sm btn-block btn-toggle" id="toggleCenter" onclick="toggleOverlay('center')">Center Crosshair</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-secondary btn-sm btn-block btn-toggle" id="toggleThirds" onclick="toggleOverlay('thirds')">Rule of Thirds</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-secondary btn-sm btn-block btn-toggle" id="toggleDiagonal" onclick="toggleOverlay('diagonal')">Diagonals (X)</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn btn-secondary btn-sm btn-block btn-toggle" id="toggleGolden" onclick="toggleOverlay('golden')">Golden Ratio</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-body">
+                         <div class="control-group">
+                            <label>Offset X/Y (Arrow Keys)</label>
+                            <div class="row">
+                                <input type="number" id="offsetX" value="0">
+                                <input type="number" id="offsetY" value="0">
+                            </div>
+                         </div>
+                         <button class="btn btn-primary btn-block" onclick="downloadImage()">Download Result</button>
+                         <button class="btn btn-danger btn-block" style="margin-top:10px;" onclick="clearAll()">Reset All</button>
+                    </div>
+                </div>
+
+            </div>
             
-            <div class="card">
-                <h3>1. Source & Canvas</h3>
-                <div class="input-group">
-                    <label>Upload Image</label>
-                    <input type="file" id="fileInput" accept="image/*">
+            <div class="footer-sidebar">
+                <p><strong>That Time I Generated a Grid on My Image</strong><br>by <a href="https://github.com/yigit-guven/" target="_blank">Yigit Guven</a></p>
+                <div style="margin-top:5px;">
+                     <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub</a> • 
+                     <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/LICENSE" target="_blank">MIT License</a> •
+                     <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/SECURITY.md" target="_blank">Privacy & Security Policy</a>
                 </div>
-                
-                <div class="input-group">
-                    <label>Output Dimensions (px)</label>
-                    <div class="row">
-                        <input type="number" id="canvasW" placeholder="W" title="Width">
-                        <input type="number" id="canvasH" placeholder="H" title="Height">
-                    </div>
-                    <button class="btn-secondary btn-sm" style="width:100%; margin-top:5px;" onclick="resetDimensionsToImage()">Reset to Image Size</button>
-                </div>
-
-                <div class="input-group">
-                     <label>Canvas Background</label>
-                     <div class="row">
-                         <button class="btn-secondary btn-sm" onclick="setBg('bg-checkers')" title="Transparent">🏁</button>
-                         <button class="btn-secondary btn-sm" onclick="setBg('bg-white')" title="White">⬜</button>
-                         <button class="btn-secondary btn-sm" onclick="setBg('bg-dark')" title="Dark">⬛</button>
-                     </div>
-                </div>
+                <p style="margin-top:8px; opacity:0.7;">Images processed locally.</p>
             </div>
+        </aside>
 
-            <div class="card">
-                <h3>2. Grid Configuration</h3>
-                <div class="input-group">
-                    <label>Calculation Mode</label>
-                    <select id="gridMode">
-                        <option value="count">Count (Rows/Cols)</option>
-                        <option value="size">Cell Size (Pixels)</option>
-                    </select>
-                </div>
-
-                <div id="mode-count" class="input-group row">
-                    <div>
-                        <label>Rows</label>
-                        <input type="number" id="gridRows" value="8">
-                    </div>
-                    <div>
-                        <label>Cols</label>
-                        <input type="number" id="gridCols" value="8">
-                    </div>
-                </div>
-
-                <div id="mode-size" class="input-group hidden">
-                    <label>Cell Size (px)</label>
-                    <input type="number" id="gridCellSize" value="100">
-                </div>
-
-                <div class="input-group row">
-                    <div>
-                        <label>Color</label>
-                        <input type="color" id="gridColor" value="#ff0000">
-                    </div>
-                    <div>
-                        <label>Thick (px)</label>
-                        <input type="number" id="gridThickness" value="2" min="1" step="0.5">
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Opacity: <span id="opacityVal">100%</span></label>
-                    <input type="range" id="gridOpacity" min="0.1" max="1" step="0.05" value="1">
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="showLabels" checked>
-                        Show Coordinates (A1, B2)
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="showCenter">
-                        Show Center Lines (Crosshair)
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="showDiagonals">
-                        Show Diagonals (X-Grid)
-                    </label>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>3. Transform & Align</h3>
-                
-                <div class="row" style="margin-bottom:12px;">
-                    <button id="lockBtn" class="btn-secondary" onclick="toggleLock()" title="Prevent accidental movement">
-                        🔓 Unlocked
-                    </button>
-                    <button id="pixelBtn" class="btn-secondary" onclick="togglePixelMode()" title="Toggle Nearest Neighbor scaling for pixel art">
-                        🌫️ Smooth
-                    </button>
-                </div>
-
-                <div class="input-group">
-                    <label>Image Zoom (Scale)</label>
-                    <input type="range" id="imgScale" min="0.1" max="10" step="0.01" value="1">
-                </div>
-
-                <div class="input-group">
-                    <label>Grid Offset (X / Y) <span class="kbd-hint">Use Arrow Keys</span></label>
-                    <div class="row">
-                        <input type="number" id="gridOffsetX" value="0">
-                        <input type="number" id="gridOffsetY" value="0">
-                    </div>
-                    <div class="row" style="margin-top:5px;">
-                         <button class="btn-secondary btn-sm" onclick="centerImage()">Center Image</button>
-                         <button class="btn-secondary btn-sm" onclick="resetOffsets()">Reset Offset</button>
-                    </div>
-                </div>
-                
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px; line-height:1.3;">
-                    <strong>Tip:</strong> Click the canvas and use Arrow Keys to nudge the grid by 1px.
-                </p>
-            </div>
-
-            <div class="card">
-                <button class="btn-success" onclick="downloadCanvas()">Download Result</button>
-                <div style="margin-top:10px;">
-                    <button class="btn-secondary" id="toggleGridBtn" style="width:100%" onclick="toggleGridVisible()">Hide Grid</button>
-                </div>
-                <button class="btn-danger-outline" style="margin-top:10px;" onclick="clearData()">Clear Saved Data</button>
-            </div>
-
-        </div>
-
-        <div class="canvas-wrapper bg-checkers" id="canvasContainer" tabindex="0">
+        <main class="viewport" id="viewport">
             <canvas id="mainCanvas"></canvas>
             
-            <div class="overlay-controls">
-                <button class="btn-secondary btn-icon" onclick="adjustZoom(0.1)" title="Zoom In">+</button>
-                <button class="btn-secondary btn-icon" onclick="adjustZoom(-0.1)" title="Zoom Out">-</button>
-                <button class="btn-secondary btn-icon" onclick="toggleLock()" id="overlayLockBtn" title="Lock/Unlock">🔓</button>
+            <div class="floating-toolbar">
+                <button class="btn btn-secondary btn-sm" onclick="adjustZoom(-0.1)">-</button>
+                <button class="btn btn-secondary btn-sm" id="zoomDisplay" onclick="resetZoom()">100%</button>
+                <button class="btn btn-secondary btn-sm" onclick="adjustZoom(0.1)">+</button>
+                <div style="width:1px; background:var(--border); margin:0 5px;"></div>
+                <button class="btn btn-secondary btn-sm" id="btnSmooth" onclick="toggleSmooth()">Smooth</button>
+                <button class="btn btn-secondary btn-sm" id="btnLock" onclick="toggleLock()">🔓</button>
             </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p><strong>Open Source Grid Generator</strong> developed by <a href="https://github.com/yigit-guven/" target="_blank">Yigit Guven</a>.</p>
-        <div class="footer-links">
-            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub Repo</a>
-            <span>•</span>
-            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/LICENSE" target="_blank">MIT License</a>
-            <span>•</span>
-            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/SECURITY.md" target="_blank">Privacy Policy</a>
-        </div>
-        <p style="margin-top: 10px; opacity: 0.6; font-size: 0.75rem;">Images are processed locally in your browser. No data is sent to any server.</p>
+        </main>
     </div>
 
     <script>
         /**
-         * APPLICATION STATE & CONSTANTS
+         * STATE MANAGEMENT
          */
-        const STORAGE_KEY = 'grid_gen_v3_state';
+        const STORAGE_KEY = 'grid_gen_pro_v1';
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvasContainer');
-        
-        // Default State
+        const viewport = document.getElementById('viewport');
+
         let state = {
-            // Canvas
-            canvasW: 800,
-            canvasH: 600,
-            bgClass: 'bg-checkers',
-            // Image
+            // Image Data
             imgData: null,
-            imgX: 0,
-            imgY: 0,
-            scale: 1,
-            pixelated: false,
-            locked: false,
-            // Grid
-            gridMode: 'count', // 'count' or 'size'
-            rows: 8,
-            cols: 8,
-            cellSize: 100,
-            color: '#ff0000',
-            thickness: 2,
-            opacity: 1,
+            imgName: 'image',
+            imgW: 800,
+            imgH: 600,
+            
+            // Transform & Filters
+            zoom: 1,
+            panX: 0,
+            panY: 0,
+            rotation: 0, // 0, 90, 180, 270
+            flipH: false,
+            flipV: false,
+            filterGray: 0,
+            filterContrast: 100,
+            filterBrightness: 100,
+            
+            // Grid Settings
+            gridType: 'standard', // standard, isometric
+            gridMode: 'count', // count, size
+            gridRows: 8,
+            gridCols: 8,
+            gridSize: 100,
+            gridColor: '#ff0000',
+            gridThick: 2,
+            gridOpacity: 1,
             gridOffsetX: 0,
             gridOffsetY: 0,
-            // Visuals
             showLabels: true,
-            showCenter: false,
-            showDiagonals: false,
-            isGridVisible: true
+
+            // Sub Grid
+            subGridEnabled: false,
+            subGridDivs: 4,
+            subGridColor: '#ffffff',
+            subGridOpacity: 0.5,
+
+            // Overlays
+            overlayCenter: false,
+            overlayThirds: false,
+            overlayDiagonal: false,
+            overlayGolden: false,
+
+            // Viewport
+            isPixelated: false, // false = smooth, true = nearest-neighbor
+            isLocked: false
         };
 
-        // Runtime variables
-        let sourceImageObj = null;
+        let sourceImage = null;
         let isDragging = false;
-        let lastMouseX = 0;
-        let lastMouseY = 0;
+        let lastMouseX = 0, lastMouseY = 0;
 
         /**
          * INITIALIZATION
          */
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
-            setupEventListeners();
-            
-            if (!sourceImageObj) {
-                draw();
-                drawEmptyState();
-            }
+            setupEvents();
+            if(!sourceImage) drawEmptyCanvas();
+            else draw();
         });
 
+        function setupEvents() {
+            // File Inputs
+            document.getElementById('fileInput').addEventListener('change', handleUpload);
+            
+            // Drag & Drop (Global)
+            window.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('dropZone').classList.add('active'); });
+            window.addEventListener('dragleave', e => { if(e.target.id === 'dropZone') document.getElementById('dropZone').classList.remove('active'); });
+            window.addEventListener('drop', handleDrop);
+
+            // Paste
+            window.addEventListener('paste', handlePaste);
+
+            // Canvas Interaction
+            viewport.addEventListener('mousedown', startPan);
+            window.addEventListener('mousemove', doPan);
+            window.addEventListener('mouseup', endPan);
+            viewport.addEventListener('wheel', handleZoom, {passive: false});
+
+            // Keyboard Shortcuts
+            window.addEventListener('keydown', handleKeys);
+
+            // UI Bindings
+            bindInputs();
+        }
+
         /**
-         * EVENT LISTENERS
+         * INPUT BINDING UTILITY
+         * Automatically binds inputs to state and redraws
          */
-        function setupEventListeners() {
-            // File Upload
-            document.getElementById('fileInput').addEventListener('change', handleImageUpload);
-            
-            // Mouse Interaction (Drag)
-            container.addEventListener('mousedown', (e) => {
-                // If interacting with canvas
-                if(e.target !== canvas && e.target !== container) return;
+        function bindInputs() {
+            const bindings = [
+                { id: 'gridRows', prop: 'gridRows', type: 'int' },
+                { id: 'gridCols', prop: 'gridCols', type: 'int' },
+                { id: 'gridCellSize', prop: 'gridSize', type: 'int' },
+                { id: 'gridColor', prop: 'gridColor' },
+                { id: 'gridThick', prop: 'gridThick', type: 'float' },
+                { id: 'gridOpacity', prop: 'gridOpacity', type: 'float' },
+                { id: 'gridType', prop: 'gridType' },
                 
-                if (state.locked) return;
+                { id: 'offsetX', prop: 'gridOffsetX', type: 'int' },
+                { id: 'offsetY', prop: 'gridOffsetY', type: 'int' },
                 
-                isDragging = true;
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
-                canvas.style.cursor = 'grabbing';
-            });
-            
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-                canvas.style.cursor = state.locked ? 'default' : 'grab';
-            });
+                { id: 'enableSubGrid', prop: 'subGridEnabled', type: 'bool' },
+                { id: 'subGridDivs', prop: 'subGridDivs', type: 'int' },
+                { id: 'subGridColor', prop: 'subGridColor' },
+                { id: 'subGridOpacity', prop: 'subGridOpacity', type: 'float' },
 
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging || state.locked) return;
-                e.preventDefault();
-                
-                const dx = e.clientX - lastMouseX;
-                const dy = e.clientY - lastMouseY;
-                
-                state.imgX += dx;
-                state.imgY += dy;
-                
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
-                
-                requestAnimationFrame(draw);
-                saveStateDebounced();
-            });
+                { id: 'showLabels', prop: 'showLabels', type: 'bool' },
 
-            // Zoom (Wheel)
-            container.addEventListener('wheel', (e) => {
-                if (state.locked) return;
-                e.preventDefault();
-                const zoomSpeed = 0.001;
-                const zoomFactor = -e.deltaY * zoomSpeed;
-                
-                let newScale = state.scale + (state.scale * zoomFactor);
-                newScale = Math.max(0.01, Math.min(newScale, 20)); // Clamp
+                { id: 'filterGray', prop: 'filterGray', type: 'int' },
+                { id: 'filterContrast', prop: 'filterContrast', type: 'int' },
+                { id: 'filterBrightness', prop: 'filterBrightness', type: 'int' }
+            ];
 
-                // Zoom towards mouse
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-
-                state.imgX = mouseX - (mouseX - state.imgX) * (newScale / state.scale);
-                state.imgY = mouseY - (mouseY - state.imgY) * (newScale / state.scale);
+            bindings.forEach(b => {
+                const el = document.getElementById(b.id);
+                if(!el) return;
                 
-                state.scale = newScale;
-                document.getElementById('imgScale').value = newScale;
-                
-                requestAnimationFrame(draw);
-                saveStateDebounced();
-            });
+                // Set initial value
+                if(b.type === 'bool') el.checked = state[b.prop];
+                else el.value = state[b.prop];
 
-            // Keyboard Nudging (Arrow Keys)
-            container.addEventListener('keydown', (e) => {
-                // Only if focused on the container to avoid scrolling page
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                    e.preventDefault();
-                    const shift = e.shiftKey ? 10 : 1; // Shift + Arrow = 10px
+                // Listen
+                el.addEventListener(b.type === 'bool' || b.id === 'gridType' ? 'change' : 'input', () => {
+                    let val = el.value;
+                    if(b.type === 'int') val = parseInt(val) || 0;
+                    if(b.type === 'float') val = parseFloat(val) || 0;
+                    if(b.type === 'bool') val = el.checked;
                     
-                    if (e.key === 'ArrowUp') state.gridOffsetY -= shift;
-                    if (e.key === 'ArrowDown') state.gridOffsetY += shift;
-                    if (e.key === 'ArrowLeft') state.gridOffsetX -= shift;
-                    if (e.key === 'ArrowRight') state.gridOffsetX += shift;
-                    
-                    updateUIFromState(); // Update inputs
+                    state[b.prop] = val;
+                    if(b.id === 'gridType') updateUIFromState();
                     draw();
-                    saveStateDebounced();
-                }
-            });
-
-            // Inputs
-            bindInput('canvasW', 'value', (v) => { state.canvasW = parseInt(v) || 100; draw(); });
-            bindInput('canvasH', 'value', (v) => { state.canvasH = parseInt(v) || 100; draw(); });
-            bindInput('gridMode', 'value', (v) => { state.gridMode = v; toggleModeInputs(); draw(); });
-            bindInput('gridRows', 'value', (v) => { state.rows = parseInt(v) || 1; draw(); });
-            bindInput('gridCols', 'value', (v) => { state.cols = parseInt(v) || 1; draw(); });
-            bindInput('gridCellSize', 'value', (v) => { state.cellSize = parseInt(v) || 10; draw(); });
-            bindInput('gridColor', 'value', (v) => { state.color = v; draw(); });
-            bindInput('gridThickness', 'value', (v) => { state.thickness = parseFloat(v); draw(); });
-            bindInput('gridOpacity', 'value', (v) => { state.opacity = parseFloat(v); document.getElementById('opacityVal').innerText = Math.round(state.opacity * 100) + '%'; draw(); });
-            
-            bindInput('showLabels', 'checked', (v) => { state.showLabels = v; draw(); });
-            bindInput('showCenter', 'checked', (v) => { state.showCenter = v; draw(); });
-            bindInput('showDiagonals', 'checked', (v) => { state.showDiagonals = v; draw(); });
-            
-            bindInput('gridOffsetX', 'value', (v) => { state.gridOffsetX = parseInt(v) || 0; draw(); });
-            bindInput('gridOffsetY', 'value', (v) => { state.gridOffsetY = parseInt(v) || 0; draw(); });
-
-            bindInput('imgScale', 'value', (v) => {
-                // Slider zoom logic (center based)
-                const oldScale = state.scale;
-                const newScale = parseFloat(v);
-                const cx = state.canvasW / 2;
-                const cy = state.canvasH / 2;
-                state.imgX = cx - (cx - state.imgX) * (newScale / oldScale);
-                state.imgY = cy - (cy - state.imgY) * (newScale / oldScale);
-                state.scale = newScale;
-                draw();
-            });
-        }
-
-        function bindInput(id, prop, callback) {
-            const el = document.getElementById(id);
-            if(!el) return;
-            el.addEventListener('input', (e) => {
-                callback(el[prop]);
-                saveStateDebounced();
+                    saveState();
+                });
             });
         }
 
         /**
-         * CORE LOGIC
+         * IMAGE HANDLING
          */
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
+        function triggerUpload() { document.getElementById('fileInput').click(); }
+
+        function handleUpload(e) { processFile(e.target.files[0]); }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('active');
+            if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+        }
+
+        function handlePaste(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    processFile(items[i].getAsFile());
+                    break;
+                }
+            }
+        }
+
+        function processFile(file) {
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = (e) => {
                 const img = new Image();
-                img.onload = function() {
-                    sourceImageObj = img;
-                    state.imgData = event.target.result;
-                    // Reset to nice defaults on new image
-                    state.canvasW = img.width;
-                    state.canvasH = img.height;
-                    state.imgX = 0;
-                    state.imgY = 0;
-                    state.scale = 1;
-                    state.gridOffsetX = 0;
-                    state.gridOffsetY = 0;
+                img.onload = () => {
+                    sourceImage = img;
+                    state.imgData = e.target.result;
+                    state.imgName = file.name.split('.')[0];
+                    state.imgW = img.width;
+                    state.imgH = img.height;
+                    
+                    // Reset View
+                    state.zoom = 1;
+                    if(img.width > viewport.clientWidth) state.zoom = (viewport.clientWidth - 40) / img.width;
+                    centerImage();
+                    resetFilters();
+                    
                     updateUIFromState();
                     draw();
                     saveState();
-                }
-                img.src = event.target.result;
-            }
+                };
+                img.src = e.target.result;
+            };
             reader.readAsDataURL(file);
         }
 
-        function toggleModeInputs() {
-            const countDiv = document.getElementById('mode-count');
-            const sizeDiv = document.getElementById('mode-size');
-            if (state.gridMode === 'count') {
-                countDiv.classList.remove('hidden');
-                sizeDiv.classList.add('hidden');
-            } else {
-                countDiv.classList.add('hidden');
-                sizeDiv.classList.remove('hidden');
-            }
+        /**
+         * CANVAS MANIPULATION
+         */
+        function startPan(e) {
+            if(state.isLocked) return;
+            isDragging = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            canvas.style.cursor = 'grabbing';
         }
 
-        function resetDimensionsToImage() {
-            if (!sourceImageObj) return alert("Upload an image first.");
-            state.canvasW = sourceImageObj.width;
-            state.canvasH = sourceImageObj.height;
-            state.imgX = 0;
-            state.imgY = 0;
-            state.scale = 1;
-            updateUIFromState();
-            draw();
-            saveState();
+        function doPan(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const dx = e.clientX - lastMouseX;
+            const dy = e.clientY - lastMouseY;
+            state.panX += dx;
+            state.panY += dy;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            canvas.style.transform = `translate(${state.panX}px, ${state.panY}px)`;
         }
 
-        function centerImage() {
-            if (!sourceImageObj) return;
-            const scaledW = sourceImageObj.width * state.scale;
-            const scaledH = sourceImageObj.height * state.scale;
-            state.imgX = (state.canvasW - scaledW) / 2;
-            state.imgY = (state.canvasH - scaledH) / 2;
-            draw();
-            saveState();
-        }
-        
-        function resetOffsets() {
-            state.gridOffsetX = 0;
-            state.gridOffsetY = 0;
-            document.getElementById('gridOffsetX').value = 0;
-            document.getElementById('gridOffsetY').value = 0;
-            draw();
-            saveState();
+        function endPan() {
+            isDragging = false;
+            canvas.style.cursor = state.isLocked ? 'default' : 'grab';
+            saveState(); // Save pos
         }
 
-        function toggleGridVisible() {
-            state.isGridVisible = !state.isGridVisible;
-            document.getElementById('toggleGridBtn').innerText = state.isGridVisible ? "Hide Grid" : "Show Grid";
-            draw();
-            saveState();
+        function handleZoom(e) {
+            if(state.isLocked) return;
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            adjustZoom(delta);
         }
 
-        /* --- New QoL Functions --- */
-
-        function toggleLock() {
-            state.locked = !state.locked;
-            const btn = document.getElementById('lockBtn');
-            const overlayBtn = document.getElementById('overlayLockBtn');
-            
-            if (state.locked) {
-                btn.innerHTML = "🔒 Locked";
-                btn.classList.add('locked-active');
-                overlayBtn.innerHTML = "🔒";
-                canvas.classList.add('locked');
-            } else {
-                btn.innerHTML = "🔓 Unlocked";
-                btn.classList.remove('locked-active');
-                overlayBtn.innerHTML = "🔓";
-                canvas.classList.remove('locked');
-            }
-            saveState();
-        }
-
-        function togglePixelMode() {
-            state.pixelated = !state.pixelated;
-            const btn = document.getElementById('pixelBtn');
-            
-            if (state.pixelated) {
-                btn.innerHTML = "👾 Pixelated";
-                canvas.classList.add('pixelated');
-            } else {
-                btn.innerHTML = "🌫️ Smooth";
-                canvas.classList.remove('pixelated');
-            }
-            draw(); // Redraw required for canvas context setting
-            saveState();
-        }
-
-        function setBg(className) {
-            state.bgClass = className;
-            container.className = 'canvas-wrapper ' + className;
-            saveState();
-        }
-        
         function adjustZoom(delta) {
-            if(state.locked) return;
-            let newScale = state.scale + delta;
-            newScale = Math.max(0.01, Math.min(newScale, 20));
-            
-            // Zoom from center logic for button click
-            const cx = state.canvasW / 2;
-            const cy = state.canvasH / 2;
-            state.imgX = cx - (cx - state.imgX) * (newScale / state.scale);
-            state.imgY = cy - (cy - state.imgY) * (newScale / state.scale);
-            
-            state.scale = newScale;
-            document.getElementById('imgScale').value = state.scale;
+            state.zoom = Math.max(0.1, Math.min(20, state.zoom + delta));
+            state.zoom = Math.round(state.zoom * 100) / 100;
             draw();
-            saveStateDebounced();
+            saveState();
+        }
+
+        function resetZoom() { state.zoom = 1; centerImage(); draw(); }
+        
+        function centerImage() {
+            // Note: panX/Y corresponds to CSS transform, not internal canvas coords
+            state.panX = 0; 
+            state.panY = 0;
+            canvas.style.transform = `translate(0px, 0px)`;
+        }
+
+        function handleKeys(e) {
+            // Nudge grid
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                // If user is focused on an input, don't hijack
+                if(document.activeElement.tagName === 'INPUT') return;
+                
+                e.preventDefault();
+                const shift = e.shiftKey ? 10 : 1;
+                if(e.key === 'ArrowLeft') state.gridOffsetX -= shift;
+                if(e.key === 'ArrowRight') state.gridOffsetX += shift;
+                if(e.key === 'ArrowUp') state.gridOffsetY -= shift;
+                if(e.key === 'ArrowDown') state.gridOffsetY += shift;
+                
+                document.getElementById('offsetX').value = state.gridOffsetX;
+                document.getElementById('offsetY').value = state.gridOffsetY;
+                draw();
+            }
+            // Paste shortcut is handled by window listener
+        }
+
+        /**
+         * TRANSFORMS & FILTERS
+         */
+        function rotateImage(deg) {
+            state.rotation = (state.rotation + deg) % 360;
+            draw();
+            saveState();
+        }
+        function flipImage(dir) {
+            if(dir === 'h') state.flipH = !state.flipH;
+            if(dir === 'v') state.flipV = !state.flipV;
+            draw();
+            saveState();
+        }
+        function resetFilters() {
+            state.filterGray = 0;
+            state.filterContrast = 100;
+            state.filterBrightness = 100;
+            state.rotation = 0;
+            state.flipH = false;
+            state.flipV = false;
+            
+            // Update UI inputs manually
+            document.getElementById('filterGray').value = 0;
+            document.getElementById('filterContrast').value = 100;
+            document.getElementById('filterBrightness').value = 100;
+            
+            draw();
+            saveState();
         }
 
         /**
          * DRAWING ENGINE
          */
+        function drawEmptyCanvas() {
+            canvas.width = 800;
+            canvas.height = 600;
+            ctx.fillStyle = '#2d2d2d';
+            ctx.fillRect(0,0,800,600);
+            ctx.fillStyle = '#666';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Drag Image Here or Click Open', 400, 300);
+            updateZoomDisplay();
+        }
+
         function draw() {
-            canvas.width = state.canvasW;
-            canvas.height = state.canvasH;
-            
-            // Crucial: Set smoothing based on state (must happen after resizing canvas)
-            ctx.imageSmoothingEnabled = !state.pixelated;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!sourceImage) return;
 
-            // 1. Draw Image
-            if (sourceImageObj) {
-                ctx.save();
-                ctx.translate(state.imgX, state.imgY);
-                ctx.scale(state.scale, state.scale);
-                ctx.drawImage(sourceImageObj, 0, 0);
-                ctx.restore();
+            // 1. Setup Canvas Dimensions (Apply Zoom here for resolution, OR use CSS for zoom)
+            // Strategy: Canvas = Actual Image Size. CSS = Visual Scaling.
+            // However, to include grid lines clearly at low resolution (pixel art), we draw grid ON the canvas.
+            // If we use CSS for zoom, grid lines scale with it. This is usually desired.
+            
+            // Check Rotation dimensions
+            let drawW = state.imgW;
+            let drawH = state.imgH;
+            if (state.rotation === 90 || state.rotation === 270) {
+                drawW = state.imgH;
+                drawH = state.imgW;
             }
 
-            // 2. Draw Grid
-            if (state.isGridVisible) {
-                drawGridLayer();
-            }
-        }
-        
-        function drawEmptyState() {
-             ctx.fillStyle = localStorage.getItem('theme') === 'dark' ? '#555' : '#aaa';
-             ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
-             ctx.textAlign = "center";
-             ctx.textBaseline = "middle";
-             ctx.fillText("Drag & Drop or Upload Image", state.canvasW/2, state.canvasH/2);
-             ctx.font = "14px sans-serif";
-             ctx.fillText("(Click 'Upload Image' in sidebar)", state.canvasW/2, state.canvasH/2 + 30);
-        }
-
-        function drawGridLayer() {
-            const hex = state.color;
-            const r = parseInt(hex.substr(1,2), 16);
-            const g = parseInt(hex.substr(3,2), 16);
-            const b = parseInt(hex.substr(5,2), 16);
+            canvas.width = drawW;
+            canvas.height = drawH;
             
-            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${state.opacity})`;
-            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${state.opacity})`;
-            ctx.lineWidth = state.thickness;
-            ctx.font = "bold 13px sans-serif";
-            ctx.textBaseline = "top";
+            // Apply Visual Zoom via CSS
+            canvas.style.width = (drawW * state.zoom) + 'px';
+            canvas.style.height = (drawH * state.zoom) + 'px';
+            canvas.style.imageRendering = state.isPixelated ? 'pixelated' : 'auto';
 
-            // Calculate Step
+            updateZoomDisplay();
+
+            ctx.save();
+
+            // 2. Draw Image with Transforms & Filters
+            ctx.filter = `grayscale(${state.filterGray}%) contrast(${state.filterContrast}%) brightness(${state.filterBrightness}%)`;
+            
+            // Handle Rotation & Flip context
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.rotate(state.rotation * Math.PI / 180);
+            ctx.scale(state.flipH ? -1 : 1, state.flipV ? -1 : 1);
+            ctx.drawImage(sourceImage, -state.imgW/2, -state.imgH/2);
+            
+            ctx.restore(); // Filters/Transforms removed for grid drawing
+
+            // 3. Draw Grid
+            if(state.gridType === 'isometric') drawIsometricGrid();
+            else drawStandardGrid();
+
+            // 4. Draw Overlays
+            drawOverlays();
+        }
+
+        function drawStandardGrid() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
             let stepX, stepY;
-            if (state.gridMode === 'count') {
-                stepX = state.canvasW / state.cols;
-                stepY = state.canvasH / state.rows;
-            } else {
-                stepX = state.cellSize;
-                stepY = state.cellSize;
-            }
 
-            // Calculate Start based on Offset
-            // We draw slightly outside bounds to ensure coverage during offsets
-            const startX = (state.gridOffsetX % stepX) - stepX; 
+            if (state.gridMode === 'count') {
+                stepX = w / state.gridRows; // Wait, rows usually divide Height? Yes.
+                // In UI: Rows cuts Y axis, Cols cuts X axis.
+                stepX = w / state.gridCols;
+                stepY = h / state.gridRows;
+            } else {
+                stepX = state.gridSize;
+                stepY = state.gridSize;
+            }
+            
+            // Clamp min size
+            if(stepX < 2) stepX = 2; 
+            if(stepY < 2) stepY = 2;
+
+            const startX = (state.gridOffsetX % stepX) - stepX;
             const startY = (state.gridOffsetY % stepY) - stepY;
 
-            // Draw Verticals
-            let colIndexStart = Math.floor(-state.gridOffsetX / stepX) - 1; 
-            let colCount = 0;
-            
-            // Standard Grid Lines
+            ctx.lineWidth = state.gridThick;
+            ctx.strokeStyle = state.gridColor;
+            ctx.globalAlpha = state.gridOpacity;
             ctx.beginPath();
-            for (let x = startX; x <= state.canvasW + stepX; x += stepX) {
-                if (x >= -state.thickness && x <= state.canvasW + state.thickness) {
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, state.canvasH);
-                    
-                    // Labels
-                    if (state.showLabels && x < state.canvasW - 5) {
-                        let labelIdx = colCount + colIndexStart + 1;
-                        if (labelIdx >= 0) {
-                            let char = getExcelColName(labelIdx); 
-                            ctx.fillText(char, x + 4, 4);
-                        }
-                    }
-                }
-                colCount++;
+
+            // Verticals
+            let colIdx = Math.floor(-state.gridOffsetX / stepX) - 1;
+            for (let x = startX; x <= w + stepX; x += stepX) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, h);
+                drawLabel(x + 4, 4, getExcelCol(colIdx + 1), 'h');
+                colIdx++;
             }
-            
             // Horizontals
-            let rowIndexStart = Math.floor(-state.gridOffsetY / stepY) - 1;
-            let rowCount = 0;
-            for (let y = startY; y <= state.canvasH + stepY; y += stepY) {
-                if (y >= -state.thickness && y <= state.canvasH + state.thickness) {
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(state.canvasW, y);
-                    
-                    if (state.showLabels && y < state.canvasH - 5) {
-                        let labelNum = rowCount + rowIndexStart + 1;
-                        if (labelNum >= 0) {
-                            ctx.fillText(labelNum, 4, y + 4);
-                        }
-                    }
-                }
-                rowCount++;
+            let rowIdx = Math.floor(-state.gridOffsetY / stepY) - 1;
+            for (let y = startY; y <= h + stepY; y += stepY) {
+                ctx.moveTo(0, y); ctx.lineTo(w, y);
+                drawLabel(4, y + 4, (rowIdx + 1).toString(), 'v');
+                rowIdx++;
             }
             ctx.stroke();
 
-            // Draw Diagonals
-            if (state.showDiagonals) {
-                ctx.save();
-                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${state.opacity * 0.6})`; // Slightly fainter
-                ctx.lineWidth = state.thickness * 0.8;
+            // SUB GRID
+            if(state.subGridEnabled && state.subGridDivs > 1) {
                 ctx.beginPath();
+                ctx.strokeStyle = state.subGridColor;
+                ctx.globalAlpha = state.subGridOpacity;
+                ctx.lineWidth = Math.max(0.5, state.gridThick / 2);
                 
-                // We iterate through cells to draw X in them
-                // This is computationally heavier, so we optimize to visible area
-                const cols = Math.ceil(state.canvasW / stepX) + 2;
-                const rows = Math.ceil(state.canvasH / stepY) + 2;
-                
-                for(let c = 0; c < cols; c++) {
-                    for(let r = 0; r < rows; r++) {
-                        let cx = startX + (c * stepX);
-                        let cy = startY + (r * stepY);
-                        // Draw X
-                        ctx.moveTo(cx, cy);
-                        ctx.lineTo(cx + stepX, cy + stepY);
-                        ctx.moveTo(cx + stepX, cy);
-                        ctx.lineTo(cx, cy + stepY);
+                const subX = stepX / state.subGridDivs;
+                const subY = stepY / state.subGridDivs;
+
+                // Optimization: Don't draw if subgrid is < 3px
+                if(subX > 3) {
+                    for (let x = startX; x <= w + stepX; x += subX) {
+                        // Skip main lines
+                        if(Math.abs((x - startX) % stepX) < 0.1) continue; 
+                        ctx.moveTo(x, 0); ctx.lineTo(x, h);
+                    }
+                    for (let y = startY; y <= h + stepY; y += subY) {
+                         if(Math.abs((y - startY) % stepY) < 0.1) continue; 
+                        ctx.moveTo(0, y); ctx.lineTo(w, y);
                     }
                 }
                 ctx.stroke();
-                ctx.restore();
             }
 
-            // Draw Center Lines (Crosshair)
-            if (state.showCenter) {
-                ctx.save();
-                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${Math.min(1, state.opacity + 0.2)})`; // slightly stronger
-                ctx.lineWidth = state.thickness * 1.5;
-                ctx.setLineDash([10, 5]); // Dashed line for distinction
+            ctx.globalAlpha = 1;
+        }
+
+        function drawIsometricGrid() {
+            // Isometric is best defined by cell size (triangle side length)
+            // We force gridMode to 'size' visually in UI, but handle logic here
+            const size = state.gridSize;
+            const h = size * Math.sin(Math.PI/3); // height of triangle row
+            
+            ctx.lineWidth = state.gridThick;
+            ctx.strokeStyle = state.gridColor;
+            ctx.globalAlpha = state.gridOpacity;
+            ctx.beginPath();
+
+            const w = canvas.width;
+            const H = canvas.height;
+            
+            // Simply drawing lines at 30 deg and 150 deg + horizontals? 
+            // True isometric grid: Vertical lines? No, usually 30/30 grid.
+            // Let's do standard Isometric (Diamond) grid
+            
+            // 1. Lines at 30 deg
+            // y = tan(30)x + c  => y = 0.577x + c
+            const tan30 = 0.577;
+            const step = size; 
+            
+            // To cover canvas with angled lines, we need a large range
+            const maxDim = Math.max(w, H) * 2;
+            
+            for(let k = -maxDim; k < maxDim; k+= step) {
+                // / Direction
+                ctx.moveTo(0, k);
+                ctx.lineTo(maxDim, k - (maxDim * tan30));
+                
+                // \ Direction
+                ctx.moveTo(0, k);
+                ctx.lineTo(maxDim, k + (maxDim * tan30));
+            }
+            
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawOverlays() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.globalAlpha = 0.8;
+            ctx.lineWidth = 2;
+
+            if(state.overlayCenter) {
+                ctx.strokeStyle = '#00ff00';
+                ctx.setLineDash([10, 5]);
                 ctx.beginPath();
-                
-                const centerX = (state.canvasW / 2) + state.gridOffsetX;
-                const centerY = (state.canvasH / 2) + state.gridOffsetY;
-
-                // Vertical Center
-                ctx.moveTo(centerX, 0);
-                ctx.lineTo(centerX, state.canvasH);
-
-                // Horizontal Center
-                ctx.moveTo(0, centerY);
-                ctx.lineTo(state.canvasW, centerY);
-                
+                ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h);
+                ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
                 ctx.stroke();
-                ctx.restore();
+                ctx.setLineDash([]);
+            }
+
+            if(state.overlayDiagonal) {
+                ctx.strokeStyle = '#ff00ff';
+                ctx.beginPath();
+                ctx.moveTo(0,0); ctx.lineTo(w,h);
+                ctx.moveTo(w,0); ctx.lineTo(0,h);
+                ctx.stroke();
+            }
+
+            if(state.overlayThirds) {
+                ctx.strokeStyle = '#00ffff';
+                ctx.beginPath();
+                ctx.moveTo(w/3, 0); ctx.lineTo(w/3, h);
+                ctx.moveTo(w*2/3, 0); ctx.lineTo(w*2/3, h);
+                ctx.moveTo(0, h/3); ctx.lineTo(w, h/3);
+                ctx.moveTo(0, h*2/3); ctx.lineTo(w, h*2/3);
+                ctx.stroke();
+            }
+            
+            if(state.overlayGolden) {
+                 ctx.strokeStyle = '#ffd700';
+                 const phi = 0.618;
+                 const x1 = w * (1-phi);
+                 const x2 = w * phi;
+                 const y1 = h * (1-phi);
+                 const y2 = h * phi;
+                 ctx.beginPath();
+                 ctx.moveTo(x1, 0); ctx.lineTo(x1, h);
+                 ctx.moveTo(x2, 0); ctx.lineTo(x2, h);
+                 ctx.moveTo(0, y1); ctx.lineTo(w, y1);
+                 ctx.moveTo(0, y2); ctx.lineTo(w, y2);
+                 ctx.stroke();
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function drawLabel(x, y, text, axis) {
+            if(!state.showLabels) return;
+            ctx.fillStyle = state.gridColor;
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textBaseline = 'top';
+            // Only draw if within bounds
+            if(x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
+                // Background for readability
+                ctx.globalAlpha = 0.8;
+                const width = ctx.measureText(text).width;
+                ctx.fillStyle = state.gridColor; // Use grid color for text
+                // Check contrast or just use shadow?
+                ctx.shadowColor = "white";
+                ctx.shadowBlur = 2;
+                ctx.fillText(text, x, y);
+                ctx.shadowBlur = 0;
             }
         }
 
-        function getExcelColName(n) {
+        function getExcelCol(n) {
             let s = "";
             while(n >= 0) {
                 s = String.fromCharCode((n % 26) + 65) + s;
@@ -954,108 +1044,152 @@
         }
 
         /**
-         * PERSISTENCE
+         * UI HELPERS
          */
-        let saveTimeout;
-        function saveStateDebounced() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveState, 500);
-        }
-
-        function saveState() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (e) {
-                // If image too big, save without image
-                const liteState = { ...state, imgData: null };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(liteState));
-            }
-        }
-
-        function loadState() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed };
-                    
-                    // UI Restore
-                    updateUIFromState();
-                    
-                    // Specific Logic Restore
-                    if(state.locked) {
-                        // Manually toggle lock visual state without flipping the boolean
-                        state.locked = !state.locked; // flip back to toggle correctly
-                        toggleLock();
-                    }
-                    if(state.pixelated) {
-                        state.pixelated = !state.pixelated;
-                        togglePixelMode();
-                    }
-                    if(state.bgClass) {
-                        setBg(state.bgClass);
-                    }
-
-                    if (state.imgData) {
-                        const img = new Image();
-                        img.onload = () => {
-                            sourceImageObj = img;
-                            draw();
-                        };
-                        img.src = state.imgData;
-                    }
-                } catch(e) {
-                    console.error(e);
+        function updateUIFromState() {
+            // Toggle Mode Buttons
+            document.getElementById('btnModeCount').classList.toggle('active', state.gridMode === 'count');
+            document.getElementById('btnModeSize').classList.toggle('active', state.gridMode === 'size');
+            
+            // Toggle Inputs
+            if(state.gridType === 'isometric') {
+                // Iso only works well with Size
+                document.getElementById('inputsCount').classList.add('hidden');
+                document.getElementById('inputsSize').classList.remove('hidden');
+                document.getElementById('btnModeCount').classList.add('hidden');
+                document.getElementById('btnModeSize').classList.add('hidden');
+            } else {
+                document.getElementById('btnModeCount').classList.remove('hidden');
+                document.getElementById('btnModeSize').classList.remove('hidden');
+                if (state.gridMode === 'count') {
+                    document.getElementById('inputsCount').classList.remove('hidden');
+                    document.getElementById('inputsSize').classList.add('hidden');
+                } else {
+                    document.getElementById('inputsCount').classList.add('hidden');
+                    document.getElementById('inputsSize').classList.remove('hidden');
                 }
             }
+
+            // Buttons visual state
+            document.getElementById('btnSmooth').innerText = state.isPixelated ? "👾 Pixel" : "🌫️ Smooth";
+            document.getElementById('btnLock').innerText = state.isLocked ? "🔒" : "🔓";
+            
+            // Toggle Overlays buttons
+            document.getElementById('toggleCenter').classList.toggle('active', state.overlayCenter);
+            document.getElementById('toggleThirds').classList.toggle('active', state.overlayThirds);
+            document.getElementById('toggleDiagonal').classList.toggle('active', state.overlayDiagonal);
+            document.getElementById('toggleGolden').classList.toggle('active', state.overlayGolden);
+
+            toggleSubInputs();
         }
 
-        function updateUIFromState() {
-            document.getElementById('canvasW').value = state.canvasW;
-            document.getElementById('canvasH').value = state.canvasH;
-            document.getElementById('gridMode').value = state.gridMode;
-            document.getElementById('gridRows').value = state.rows;
-            document.getElementById('gridCols').value = state.cols;
-            document.getElementById('gridCellSize').value = state.cellSize;
-            document.getElementById('gridColor').value = state.color;
-            document.getElementById('gridThickness').value = state.thickness;
-            document.getElementById('gridOpacity').value = state.opacity;
-            
-            document.getElementById('showLabels').checked = state.showLabels;
-            document.getElementById('showCenter').checked = state.showCenter;
-            document.getElementById('showDiagonals').checked = state.showDiagonals;
-            
-            document.getElementById('gridOffsetX').value = state.gridOffsetX;
-            document.getElementById('gridOffsetY').value = state.gridOffsetY;
-            document.getElementById('imgScale').value = state.scale;
-            document.getElementById('opacityVal').innerText = Math.round(state.opacity * 100) + '%';
-            document.getElementById('toggleGridBtn').innerText = state.isGridVisible ? "Hide Grid" : "Show Grid";
-            
-            toggleModeInputs();
+        function setGridMode(mode) {
+            state.gridMode = mode;
+            updateUIFromState();
+            draw();
+            saveState();
         }
 
-        function clearData() {
-            if(confirm("Reset all settings and clear image?")) {
+        function togglePanel(header) {
+            header.parentElement.classList.toggle('collapsed');
+        }
+
+        function toggleSubInputs() {
+            const el = document.getElementById('subGridControls');
+            state.subGridEnabled ? el.classList.remove('hidden') : el.classList.add('hidden');
+        }
+
+        function toggleOverlay(type) {
+            if(type === 'center') state.overlayCenter = !state.overlayCenter;
+            if(type === 'thirds') state.overlayThirds = !state.overlayThirds;
+            if(type === 'diagonal') state.overlayDiagonal = !state.overlayDiagonal;
+            if(type === 'golden') state.overlayGolden = !state.overlayGolden;
+            updateUIFromState();
+            draw();
+            saveState();
+        }
+
+        function toggleSmooth() {
+            state.isPixelated = !state.isPixelated;
+            draw();
+            saveState();
+            updateUIFromState();
+        }
+
+        function toggleLock() {
+            state.isLocked = !state.isLocked;
+            endPan(); // reset cursor
+            updateUIFromState();
+        }
+
+        function updateZoomDisplay() {
+            document.getElementById('zoomDisplay').innerText = Math.round(state.zoom * 100) + "%";
+        }
+
+        function downloadImage() {
+            if(!sourceImage) return;
+            const link = document.createElement('a');
+            link.download = `${state.imgName}_grid.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function clearAll() {
+            if(confirm("Clear image and reset all settings?")) {
                 localStorage.removeItem(STORAGE_KEY);
                 location.reload();
             }
         }
 
-        function downloadCanvas() {
-            const link = document.createElement('a');
-            link.download = 'grid-image.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
+        /**
+         * THEME & PERSISTENCE
+         */
         function toggleTheme() {
             const html = document.documentElement;
-            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
-            draw(); 
-            if(!sourceImageObj) drawEmptyState();
         }
+
+        function saveState() {
+            // Debounce handled naturally by JS execution loop usually fine for this scale,
+            // but for base64 image, we should be careful.
+            // We save everything EXCEPT imgData if it's huge, but for now let's try.
+            try {
+                // If image is too big, localstorage fails. 
+                const safeState = {...state};
+                // We keep image in memory, but maybe not save it every millisecond
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(safeState));
+            } catch(e) {
+                console.log("Storage full or error", e);
+                // Fallback: save settings without image
+                const noImg = {...state, imgData: null};
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(noImg));
+            }
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = {...state, ...parsed};
+                    updateUIFromState();
+                    if(state.imgData) {
+                        const img = new Image();
+                        img.onload = () => {
+                            sourceImage = img;
+                            state.imgW = img.width;
+                            state.imgH = img.height;
+                            draw();
+                        };
+                        img.src = state.imgData;
+                    }
+                } catch(e) { console.error(e); }
+            }
+        }
+
     </script>
 </body>
 </html>
