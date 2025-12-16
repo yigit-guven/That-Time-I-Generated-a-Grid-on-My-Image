@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>That Time I Generated a Grid on My Image</title>
-    <script src="theme.js"></script> 
     <style>
         /* 1. Define Variables (Light Mode Default) */
         :root {
@@ -69,12 +68,17 @@
             margin-bottom: 20px; 
         }
 
-        input { 
+        input, select { 
             padding: 10px; 
             border: 1px solid var(--border-color); 
             border-radius: 4px; 
             background: var(--bg-color);
             color: var(--text-color);
+        }
+
+        /* Helper class to hide/show inputs without breaking UI style */
+        .hidden {
+            display: none !important;
         }
 
         /* Specific style for color picker */
@@ -152,8 +156,19 @@
     <div class="controls">
         <input type="file" id="upload" accept="image/*">
         
-        <input type="number" id="rows" placeholder="Rows" value="10" style="width: 80px;" title="Rows (Y)">
-        <input type="number" id="cols" placeholder="Cols" value="10" style="width: 80px;" title="Cols (X)">
+        <select id="gridMode" title="Calculation Mode">
+            <option value="count">Count (Rows/Cols)</option>
+            <option value="size">Size (Pixels)</option>
+        </select>
+
+        <span id="inputs-count" style="display: contents;">
+            <input type="number" id="rows" placeholder="Rows" value="10" style="width: 80px;" title="Rows (Y)">
+            <input type="number" id="cols" placeholder="Cols" value="10" style="width: 80px;" title="Cols (X)">
+        </span>
+
+        <span id="inputs-size" class="hidden" style="display: contents;">
+            <input type="number" id="cellSize" placeholder="Px Size" value="32" style="width: 80px;" title="Cell Size (px)">
+        </span>
         
         <input type="number" id="lineWidth" placeholder="Width" value="1" min="1" style="width: 80px;" title="Line Width (px)">
 
@@ -182,6 +197,8 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const toggleBtn = document.getElementById('toggleBtn');
+        const modeSelect = document.getElementById('gridMode');
+        
         let currentImg = null;
         let isGridVisible = true; // Track grid state
 
@@ -203,12 +220,28 @@
         });
 
         // 1.5 Auto-update when inputs change
-        document.getElementById('gridColor').addEventListener('input', drawGrid);
-        document.getElementById('lineWidth').addEventListener('input', drawGrid);
-        document.getElementById('rows').addEventListener('input', drawGrid);
-        document.getElementById('cols').addEventListener('input', drawGrid);
+        const inputs = ['gridColor', 'lineWidth', 'rows', 'cols', 'cellSize'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', drawGrid);
+        });
 
-        // 2. Toggle Logic
+        // 2. Handle Mode Switching (UI Logic)
+        modeSelect.addEventListener('change', function() {
+            const mode = this.value;
+            const countInputs = document.getElementById('inputs-count');
+            const sizeInputs = document.getElementById('inputs-size');
+
+            if(mode === 'count') {
+                countInputs.classList.remove('hidden');
+                sizeInputs.classList.add('hidden');
+            } else {
+                countInputs.classList.add('hidden');
+                sizeInputs.classList.remove('hidden');
+            }
+            drawGrid();
+        });
+
+        // 3. Toggle Logic
         function toggleGrid() {
             if (!currentImg) return;
             
@@ -226,15 +259,9 @@
             drawGrid();
         }
 
-        // 3. Draw Grid Logic
+        // 4. Draw Grid Logic
         function drawGrid() {
             if (!currentImg) return;
-            
-            // Get input values
-            const rows = parseInt(document.getElementById('rows').value) || 10;
-            const cols = parseInt(document.getElementById('cols').value) || 10;
-            const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; 
-            const color = document.getElementById('gridColor').value; 
             
             // Resize canvas to match the image size
             canvas.width = currentImg.width;
@@ -245,31 +272,50 @@
             
             // Only draw lines if grid is visible
             if (isGridVisible) {
-                // Setup Line Style
+                const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; 
+                const color = document.getElementById('gridColor').value; 
+                const mode = modeSelect.value;
+
                 ctx.strokeStyle = color; 
                 ctx.lineWidth = widthVal; 
 
+                // Determine Step Sizes
+                let stepX, stepY;
+
+                if (mode === 'count') {
+                    // Logic: Total Rows/Cols
+                    const rows = parseInt(document.getElementById('rows').value) || 10;
+                    const cols = parseInt(document.getElementById('cols').value) || 10;
+                    stepX = canvas.width / cols;
+                    stepY = canvas.height / rows;
+                } else {
+                    // Logic: Pixel Size
+                    const size = parseInt(document.getElementById('cellSize').value) || 32;
+                    stepX = size;
+                    stepY = size;
+                }
+
                 // Draw Horizontal Lines
-                const rowH = canvas.height / rows;
-                for(let i=1; i<rows; i++) {
+                // Start at stepY to avoid drawing on the very top edge
+                for(let y = stepY; y < canvas.height; y += stepY) {
                     ctx.beginPath(); 
-                    ctx.moveTo(0, i * rowH); 
-                    ctx.lineTo(canvas.width, i * rowH); 
+                    ctx.moveTo(0, y); 
+                    ctx.lineTo(canvas.width, y); 
                     ctx.stroke();
                 }
 
                 // Draw Vertical Lines
-                const colW = canvas.width / cols;
-                for(let i=1; i<cols; i++) {
+                // Start at stepX to avoid drawing on the very left edge
+                for(let x = stepX; x < canvas.width; x += stepX) {
                     ctx.beginPath(); 
-                    ctx.moveTo(i * colW, 0); 
-                    ctx.lineTo(i * colW, canvas.height); 
+                    ctx.moveTo(x, 0); 
+                    ctx.lineTo(x, canvas.height); 
                     ctx.stroke();
                 }
             }
         }
 
-        // 4. Download Logic
+        // 5. Download Logic
         function downloadImage() {
             if(!currentImg) return alert("Please upload an image first!");
             
@@ -280,14 +326,12 @@
             link.click();
         }
 
-        // Optional: Include toggleTheme logic if theme.js is missing
-        if (typeof toggleTheme !== 'function') {
-            function toggleTheme() {
-                const body = document.body;
-                const currentTheme = body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                body.setAttribute('data-theme', newTheme);
-            }
+        // 6. Theme Logic (Inline for safety)
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
         }
     </script>
 </body>
