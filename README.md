@@ -63,25 +63,6 @@ You can use the application directly via the web or run it locally.
 
 ---
 
-## 📦 Building for Desktop (Electron)
-
-To run this as a standalone native application on Windows, macOS, or Linux:
-
-1.  **Install Dependencies** (Requires Node.js)
-    ```bash
-    npm install
-    ```
-2.  **Start Development Mode**
-    ```bash
-    npm start
-    ```
-3.  **Build Executable**
-    ```bash
-    npm run pack
-    ```
-
----
-
 ## 📸 Screenshots
 
 | Light Mode | Dark Mode |
