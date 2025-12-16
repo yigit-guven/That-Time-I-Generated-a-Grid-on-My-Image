@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>That Time I Generated a Grid on My Image (Artist Edition)</title>
+    <title>That Time I Generated a Grid on My Image</title>
     
     <script>
+        // Inline Theme Script to prevent flash of wrong theme
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
             if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
@@ -17,535 +17,802 @@
     </script>
 
     <style>
-        /* 1. Define Variables */
+        /* --- 1. Modern CSS Variables (High Contrast) --- */
         :root {
-            --bg-color: #f0f0f0;
-            --container-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #cccccc;
-            --shadow: rgba(0,0,0,0.1);
-            --accent-color: #007bff;
-            --secondary-bg: #f8f9fa;
+            /* Light Theme */
+            --bg-body: #eef2f5;
+            --bg-card: #ffffff;
+            --bg-input: #f8f9fa;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+            --border: #ced4da;
+            --primary: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --danger: #dc3545;
+            --success: #198754;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --radius: 6px;
         }
 
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --container-bg: #2d2d2d;
-            --text-color: #e0e0e0;
-            --border-color: #444444;
-            --shadow: rgba(0,0,0,0.5);
-            --accent-color: #4da3ff;
-            --secondary-bg: #3a3a3a;
+            /* Dark Theme */
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2d2d2d;
+            --text-main: #e9ecef;
+            --text-muted: #adb5bd;
+            --border: #495057;
+            --primary: #3d8bfd;
+            --primary-hover: #5c9eff;
+            --danger: #e35d6a;
+            --success: #2ecc71;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
-        /* 2. Global Styles */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
-            align-items: center; 
-            background: var(--bg-color); 
-            color: var(--text-color);
+        /* --- 2. Base Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px; 
-            transition: background 0.3s, color 0.3s;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        /* Header */
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- 3. Layout Components --- */
         .header {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border-color);
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
         }
 
-        .header h1 { margin: 0; font-size: 1.5rem; } 
-        .header span { font-size: 0.9rem; opacity: 0.7; }
+        .header-content h1 { margin: 0 0 5px 0; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; }
+        .header-content p { margin: 0; color: var(--text-muted); font-size: 0.95rem; max-width: 600px; line-height: 1.4; }
 
-        /* Controls Area - Grid Layout */
-        .controls-container {
+        .container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
             width: 100%;
-            max-width: 1000px;
-            margin-bottom: 20px;
+            max-width: 1200px;
+            align-items: start;
         }
 
-        .control-group { 
-            background: var(--container-bg); 
-            padding: 15px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 10px var(--shadow); 
-            border: 1px solid var(--border-color);
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 15px; }
+        }
+
+        /* --- 4. Sidebar / Controls --- */
+        .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
-        .control-group h3 {
-            margin: 0 0 10px 0;
-            font-size: 1rem;
-            color: var(--accent-color);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
 
-        .input-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
         }
 
-        label {
-            font-size: 0.85rem;
+        .input-group { margin-bottom: 10px; }
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
             font-weight: 600;
-            white-space: nowrap;
+            margin-bottom: 4px;
         }
 
-        input, select { 
-            padding: 8px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 4px; 
-            background: var(--secondary-bg);
-            color: var(--text-color);
+        .row { display: flex; gap: 8px; }
+        .row > * { flex: 1; }
+
+        input[type="text"], input[type="number"], select {
             width: 100%;
+            padding: 8px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 4px;
+            font-size: 0.9rem;
             box-sizing: border-box;
+            font-variant-numeric: tabular-nums;
         }
 
-        input[type="number"] { font-variant-numeric: tabular-nums; }
-
-        /* Sliders */
         input[type="range"] {
-            -webkit-appearance: none;
             width: 100%;
-            height: 6px;
-            background: var(--border-color);
-            border-radius: 3px;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--accent-color);
-            border-radius: 50%;
             cursor: pointer;
+            accent-color: var(--primary);
         }
 
-        /* Color Picker */
-        .color-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-        }
         input[type="color"] {
-            padding: 0;
-            width: 40px;
+            width: 100%;
             height: 35px;
-            border: none;
-            cursor: pointer;
+            border: 1px solid var(--border);
             background: none;
+            cursor: pointer;
+            padding: 0;
         }
 
-        .hidden { display: none !important; }
-
-        button { 
-            padding: 10px 20px; 
-            background: var(--accent-color); 
-            color: white; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: bold;
-            transition: opacity 0.2s;
+        /* --- 5. Buttons --- */
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s, transform 0.1s;
         }
+        button:active { transform: translateY(1px); }
         button:hover { opacity: 0.9; }
 
-        .theme-btn {
-            background: transparent;
-            border: 1px solid var(--text-color);
-            color: var(--text-color);
-            padding: 5px 15px;
-        }
-        
-        .action-bar {
-            grid-column: 1 / -1;
+        .btn-primary { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
+        .btn-secondary { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-success { background: var(--success); color: white; width: 100%; }
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
+
+        /* --- 6. Canvas Area --- */
+        .canvas-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
             display: flex;
-            gap: 10px;
             justify-content: center;
-            flex-wrap: wrap;
-            background: var(--container-bg);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px var(--shadow);
-        }
-
-        .toggle-btn { background: #6c757d; }
-        .download-btn { background: #28a745; }
-
-        /* Canvas */
-        canvas { 
-            max-width: 100%; 
-            height: auto; 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 4px 20px var(--shadow); 
-            background-image: 
-                linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+            align-items: center;
+            min-height: 500px;
+            overflow: auto;
+            position: relative;
+            /* Checkerboard background for transparency */
+            background-image:
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
                 linear-gradient(-45deg, transparent 75%, #ccc 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
-        /* Footer */
-        .footer {
-            margin-top: auto; 
-            padding-top: 40px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-color);
-            opacity: 0.8;
-            width: 100%;
-            border-top: 1px solid var(--border-color);
+        canvas {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: grab;
+            max-width: 100%;
         }
-        .footer a { color: var(--accent-color); text-decoration: none; }
+        canvas:active { cursor: grabbing; }
+
+        /* --- 7. Footer --- */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+        .footer-links { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap;}
+
+        .hidden { display: none; }
+        .badge {
+            font-size: 0.7rem;
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
+        <div class="header-content">
+            <h1>That Time I Generated a Grid on My Image</h1>
+            <p>A lightweight, client-side tool to overlay customizable grids on images. Built with HTML5 and the Canvas API; runs entirely in the browser. Zoom, crop, align, and download.</p>
+        </div>
         <div>
-            <h1>Grid Generator</h1>
-            <span>Artist Edition: Crop, Move & Align</span>
-        </div>
-        <button class="theme-btn" onclick="toggleTheme()">🌗 Theme</button>
-    </div>
-
-    <div class="controls-container">
-        
-        <div class="control-group">
-            <h3>1. Source</h3>
-            <input type="file" id="upload" accept="image/*">
-            <div class="input-row">
-                <label>Mode:</label>
-                <select id="gridMode" title="Calculation Mode">
-                    <option value="count">Count (Rows/Cols)</option>
-                    <option value="size">Size (Pixels)</option>
-                </select>
-            </div>
-            
-            <div id="inputs-count" class="input-row">
-                <input type="number" id="rows" placeholder="Rows" value="8" title="Rows (Y)">
-                <input type="number" id="cols" placeholder="Cols" value="8" title="Cols (X)">
-            </div>
-            <div id="inputs-size" class="input-row hidden">
-                <input type="number" id="cellSize" placeholder="Px Size" value="50" step="1" title="Cell Size (px)">
-            </div>
-        </div>
-
-        <div class="control-group">
-            <h3>2. Grid Style</h3>
-            <div class="color-wrapper">
-                <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
-                <input type="number" id="lineWidth" value="1" min="0.1" step="0.1" title="Line Thickness" style="width: 70px;">
-                <label>px</label>
-            </div>
-            
-            <div class="input-row">
-                <label>Opacity:</label>
-                <input type="range" id="gridOpacity" min="0.1" max="1" step="0.05" value="1">
-            </div>
-
-            <div class="input-row" style="justify-content: flex-start;">
-                <input type="checkbox" id="showLabels" style="width: auto; margin-right: 10px;">
-                <label for="showLabels">Show Axis Labels (A1, B2)</label>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <h3>3. Move Grid (Align)</h3>
-            <div class="input-row">
-                <label>X Offset:</label>
-                <input type="number" id="gridOffsetX" value="0" step="1" title="Shift Grid Left/Right">
-            </div>
-            <div class="input-row">
-                <label>Y Offset:</label>
-                <input type="number" id="gridOffsetY" value="0" step="1" title="Shift Grid Up/Down">
-            </div>
-            <button onclick="resetGridOffset()" style="padding: 5px; font-size: 0.8rem; background: var(--border-color); color: var(--text-color);">Reset Grid</button>
-        </div>
-
-        <div class="control-group">
-            <h3>4. Crop / Move Image</h3>
-            <div class="input-row">
-                <label>Scale:</label>
-                <input type="number" id="imgScale" value="1" step="0.01" min="0.1" title="Zoom Image">
-            </div>
-            <div class="input-row">
-                <label>Pos X:</label>
-                <input type="number" id="imgX" value="0" step="10" title="Move Image Left/Right">
-            </div>
-            <div class="input-row">
-                <label>Pos Y:</label>
-                <input type="number" id="imgY" value="0" step="10" title="Move Image Up/Down">
-            </div>
-            <button onclick="resetImageTransform()" style="padding: 5px; font-size: 0.8rem; background: var(--border-color); color: var(--text-color);">Reset Image</button>
-        </div>
-
-        <div class="action-bar">
-            <button onclick="drawGrid()">Update View</button>
-            <button id="toggleBtn" class="toggle-btn" onclick="toggleGrid()">Hide Grid</button>
-            <button onclick="downloadImage()" class="download-btn">Download Image</button>
+            <button class="btn-secondary" onclick="toggleTheme()">🌗 Theme</button>
         </div>
     </div>
 
-    <canvas id="canvas"></canvas>
+    <div class="container">
+        <div class="sidebar">
+            
+            <div class="card">
+                <h3>1. Source & Canvas</h3>
+                <div class="input-group">
+                    <label>Upload Image</label>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+                
+                <div class="input-group">
+                    <label>Output Dimensions (px)</label>
+                    <div class="row">
+                        <input type="number" id="canvasW" placeholder="W" title="Width">
+                        <input type="number" id="canvasH" placeholder="H" title="Height">
+                    </div>
+                    <button class="btn-secondary btn-sm" style="width:100%; margin-top:5px;" onclick="resetDimensionsToImage()">Reset to Image Size</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. Grid Configuration</h3>
+                <div class="input-group">
+                    <label>Calculation Mode</label>
+                    <select id="gridMode">
+                        <option value="count">Count (Rows/Cols)</option>
+                        <option value="size">Cell Size (Pixels)</option>
+                    </select>
+                </div>
+
+                <div id="mode-count" class="input-group row">
+                    <div>
+                        <label>Rows</label>
+                        <input type="number" id="gridRows" value="8">
+                    </div>
+                    <div>
+                        <label>Cols</label>
+                        <input type="number" id="gridCols" value="8">
+                    </div>
+                </div>
+
+                <div id="mode-size" class="input-group hidden">
+                    <label>Cell Size (px)</label>
+                    <input type="number" id="gridCellSize" value="100">
+                </div>
+
+                <div class="input-group row">
+                    <div>
+                        <label>Color</label>
+                        <input type="color" id="gridColor" value="#ff0000">
+                    </div>
+                    <div>
+                        <label>Thick (px)</label>
+                        <input type="number" id="gridThickness" value="2" min="1" step="0.5">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Opacity: <span id="opacityVal">100%</span></label>
+                    <input type="range" id="gridOpacity" min="0.1" max="1" step="0.05" value="1">
+                </div>
+
+                <div class="input-group">
+                    <label style="display:flex; align-items:center;">
+                        <input type="checkbox" id="showLabels" checked style="width:auto; margin-right:8px;">
+                        Show Coordinates (A1, B2)
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3. Transform & Align</h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
+                    💡 Tip: You can also <strong>Drag</strong> the image and use <strong>Mouse Wheel</strong> to zoom directly on the canvas.
+                </p>
+                
+                <div class="input-group">
+                    <label>Image Zoom (Scale)</label>
+                    <input type="range" id="imgScale" min="0.1" max="5" step="0.01" value="1">
+                </div>
+
+                <div class="input-group row">
+                    <div>
+                        <label>Grid Offset X</label>
+                        <input type="number" id="gridOffsetX" value="0">
+                    </div>
+                    <div>
+                        <label>Grid Offset Y</label>
+                        <input type="number" id="gridOffsetY" value="0">
+                    </div>
+                </div>
+                
+                <button class="btn-secondary" onclick="centerImage()">Center Image</button>
+            </div>
+
+            <div class="card">
+                <button class="btn-success" onclick="downloadCanvas()">Download Result</button>
+                <div style="margin-top:10px;">
+                    <button class="btn-secondary" id="toggleGridBtn" style="width:100%" onclick="toggleGrid()">Hide Grid</button>
+                </div>
+                <button class="btn-secondary" style="width:100%; margin-top:10px; color: var(--danger); border-color: var(--danger);" onclick="clearData()">Clear Saved Data</button>
+            </div>
+
+        </div>
+
+        <div class="canvas-wrapper" id="canvasContainer">
+            <canvas id="mainCanvas"></canvas>
+        </div>
+    </div>
 
     <div class="footer">
-        <p>Open Source Grid Generator</p>
-        <p>
-            <a href="https://github.com/yigit-guven" target="_blank">Based on GitHub Repo</a>
-        </p>
+        <p><strong>Open Source Grid Generator</strong> developed by <a href="https://github.com/yigit-guven/" target="_blank">Yigit Guven</a>.</p>
+        <div class="footer-links">
+            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub Repo</a>
+            <span>•</span>
+            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/LICENSE" target="_blank">MIT License</a>
+            <span>•</span>
+            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/SECURITY.md" target="_blank">Privacy Policy</a>
+        </div>
+        <p style="margin-top: 10px; opacity: 0.6; font-size: 0.75rem;">Images are processed locally in your browser. No data is sent to any server.</p>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
+        /**
+         * APPLICATION STATE & CONSTANTS
+         */
+        const STORAGE_KEY = 'grid_gen_v2_state';
+        const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const modeSelect = document.getElementById('gridMode');
+        const container = document.getElementById('canvasContainer');
         
-        let currentImg = null;
-        let isGridVisible = true;
-        
-        // Listeners for all inputs
-        const inputs = [
-            'gridColor', 'lineWidth', 'rows', 'cols', 'cellSize', 'gridOpacity', 'showLabels',
-            'gridOffsetX', 'gridOffsetY',
-            'imgScale', 'imgX', 'imgY'
-        ];
-        
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener('input', drawGrid);
-            if(el) el.addEventListener('change', drawGrid); // For checkbox/file
+        // Default State
+        let state = {
+            // Canvas
+            canvasW: 800,
+            canvasH: 600,
+            // Image
+            imgData: null, // Base64 string
+            imgX: 0,
+            imgY: 0,
+            scale: 1,
+            // Grid
+            gridMode: 'count', // 'count' or 'size'
+            rows: 8,
+            cols: 8,
+            cellSize: 100,
+            color: '#ff0000',
+            thickness: 2,
+            opacity: 1,
+            showLabels: true,
+            gridOffsetX: 0,
+            gridOffsetY: 0,
+            // UI
+            isGridVisible: true
+        };
+
+        // Runtime variables (not saved)
+        let sourceImageObj = null;
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        /**
+         * INITIALIZATION
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            setupEventListeners();
+            // If no image loaded, draw blank canvas or instructions
+            if (!sourceImageObj) {
+                draw();
+                ctx.fillStyle = localStorage.getItem('theme') === 'dark' ? '#333' : '#ddd';
+                ctx.font = "20px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Upload an image to begin", state.canvasW/2, state.canvasH/2);
+            }
         });
 
-        // 1. Handle Image Upload
-        document.getElementById('upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
+        /**
+         * EVENT LISTENERS
+         */
+        function setupEventListeners() {
+            // File Upload
+            document.getElementById('fileInput').addEventListener('change', handleImageUpload);
             
+            // Canvas Interactions (Drag & Zoom)
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            });
+            
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const dx = e.clientX - lastMouseX;
+                const dy = e.clientY - lastMouseY;
+                
+                state.imgX += dx;
+                state.imgY += dy;
+                
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                
+                requestAnimationFrame(draw);
+                saveStateDebounced();
+            });
+
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomSpeed = 0.001;
+                const zoomFactor = -e.deltaY * zoomSpeed;
+                
+                // Calculate new scale
+                let newScale = state.scale + (state.scale * zoomFactor);
+                newScale = Math.max(0.1, Math.min(newScale, 10)); // Clamp
+
+                // Zoom towards mouse position logic
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Move image position to compensate for scale change to keep mouse focused
+                state.imgX = mouseX - (mouseX - state.imgX) * (newScale / state.scale);
+                state.imgY = mouseY - (mouseY - state.imgY) * (newScale / state.scale);
+                
+                state.scale = newScale;
+                
+                // Sync slider
+                document.getElementById('imgScale').value = newScale;
+                
+                requestAnimationFrame(draw);
+                saveStateDebounced();
+            });
+
+            // Input Bindings
+            bindInput('canvasW', 'value', (v) => { state.canvasW = parseInt(v) || 100; draw(); });
+            bindInput('canvasH', 'value', (v) => { state.canvasH = parseInt(v) || 100; draw(); });
+            
+            bindInput('gridMode', 'value', (v) => { 
+                state.gridMode = v; 
+                toggleModeInputs(); 
+                draw(); 
+            });
+
+            bindInput('gridRows', 'value', (v) => { state.rows = parseInt(v) || 1; draw(); });
+            bindInput('gridCols', 'value', (v) => { state.cols = parseInt(v) || 1; draw(); });
+            bindInput('gridCellSize', 'value', (v) => { state.cellSize = parseInt(v) || 10; draw(); });
+            bindInput('gridColor', 'value', (v) => { state.color = v; draw(); });
+            bindInput('gridThickness', 'value', (v) => { state.thickness = parseFloat(v); draw(); });
+            bindInput('gridOpacity', 'value', (v) => { 
+                state.opacity = parseFloat(v); 
+                document.getElementById('opacityVal').innerText = Math.round(state.opacity * 100) + '%';
+                draw(); 
+            });
+            
+            bindInput('showLabels', 'checked', (v) => { state.showLabels = v; draw(); });
+            
+            bindInput('gridOffsetX', 'value', (v) => { state.gridOffsetX = parseInt(v) || 0; draw(); });
+            bindInput('gridOffsetY', 'value', (v) => { state.gridOffsetY = parseInt(v) || 0; draw(); });
+
+            bindInput('imgScale', 'value', (v) => {
+                // If zooming via slider, zoom from center of canvas
+                const oldScale = state.scale;
+                const newScale = parseFloat(v);
+                
+                const cx = state.canvasW / 2;
+                const cy = state.canvasH / 2;
+                
+                state.imgX = cx - (cx - state.imgX) * (newScale / oldScale);
+                state.imgY = cy - (cy - state.imgY) * (newScale / oldScale);
+                
+                state.scale = newScale;
+                draw();
+            });
+        }
+
+        // Helper to bind inputs to state
+        function bindInput(id, prop, callback) {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.addEventListener('input', (e) => {
+                callback(el[prop]);
+                saveStateDebounced();
+            });
+        }
+
+        /**
+         * CORE LOGIC
+         */
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    currentImg = img;
-                    // Reset Transforms on new image
-                    resetImageTransform();
-                    resetGridOffset();
-                    drawGrid();
+                    sourceImageObj = img;
+                    state.imgData = event.target.result;
+                    
+                    // First time load: set canvas to match image
+                    state.canvasW = img.width;
+                    state.canvasH = img.height;
+                    state.imgX = 0;
+                    state.imgY = 0;
+                    state.scale = 1;
+                    
+                    updateUIFromState();
+                    draw();
+                    saveState();
                 }
                 img.src = event.target.result;
             }
             reader.readAsDataURL(file);
-        });
+        }
 
-        // 2. Mode Switching
-        modeSelect.addEventListener('change', function() {
-            const mode = this.value;
-            const countInputs = document.getElementById('inputs-count');
-            const sizeInputs = document.getElementById('inputs-size');
-
-            if(mode === 'count') {
-                countInputs.classList.remove('hidden');
-                sizeInputs.classList.add('hidden');
+        function toggleModeInputs() {
+            const countDiv = document.getElementById('mode-count');
+            const sizeDiv = document.getElementById('mode-size');
+            if (state.gridMode === 'count') {
+                countDiv.classList.remove('hidden');
+                sizeDiv.classList.add('hidden');
             } else {
-                countInputs.classList.add('hidden');
-                sizeInputs.classList.remove('hidden');
+                countDiv.classList.add('hidden');
+                sizeDiv.classList.remove('hidden');
             }
-            drawGrid();
-        });
+        }
 
-        // 3. Helper Functions
-        function toggleGrid() {
-            if (!currentImg) return;
-            isGridVisible = !isGridVisible;
+        function resetDimensionsToImage() {
+            if (!sourceImageObj) return alert("Upload an image first.");
+            state.canvasW = sourceImageObj.width;
+            state.canvasH = sourceImageObj.height;
+            state.imgX = 0;
+            state.imgY = 0;
+            state.scale = 1;
+            updateUIFromState();
+            draw();
+            saveState();
+        }
+
+        function centerImage() {
+            if (!sourceImageObj) return;
+            // Center the image within the current canvas dimensions
+            const scaledW = sourceImageObj.width * state.scale;
+            const scaledH = sourceImageObj.height * state.scale;
             
-            if (isGridVisible) {
-                toggleBtn.innerText = "Hide Grid";
-                toggleBtn.style.opacity = "1";
-            } else {
-                toggleBtn.innerText = "Show Grid";
-                toggleBtn.style.opacity = "0.7";
-            }
-            drawGrid();
+            state.imgX = (state.canvasW - scaledW) / 2;
+            state.imgY = (state.canvasH - scaledH) / 2;
+            draw();
+            saveState();
         }
 
-        function resetGridOffset() {
-            document.getElementById('gridOffsetX').value = 0;
-            document.getElementById('gridOffsetY').value = 0;
-            drawGrid();
+        function toggleGrid() {
+            state.isGridVisible = !state.isGridVisible;
+            const btn = document.getElementById('toggleGridBtn');
+            btn.innerText = state.isGridVisible ? "Hide Grid" : "Show Grid";
+            draw();
+            saveState();
         }
 
-        function resetImageTransform() {
-            document.getElementById('imgScale').value = 1;
-            document.getElementById('imgX').value = 0;
-            document.getElementById('imgY').value = 0;
-            drawGrid();
-        }
-
-        // 4. MAIN DRAW FUNCTION
-        function drawGrid() {
-            if (!currentImg) return;
-
-            // 1. Setup Canvas Dimensions
-            // The canvas size stays fixed to the original image dimensions
-            // unless we wanted to allow resizing the output. 
-            // For crop/move, we keep canvas = original img size, and move content inside.
-            canvas.width = currentImg.width;
-            canvas.height = currentImg.height;
-
-            // Clear Background
+        /**
+         * DRAWING ENGINE
+         */
+        function draw() {
+            // Update Canvas DOM Dimensions
+            canvas.width = state.canvasW;
+            canvas.height = state.canvasH;
+            
+            // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 2. Draw Image (with Transforms)
-            const scale = parseFloat(document.getElementById('imgScale').value) || 1;
-            const imgX = parseFloat(document.getElementById('imgX').value) || 0;
-            const imgY = parseFloat(document.getElementById('imgY').value) || 0;
+            // 1. Draw Image (with transforms)
+            if (sourceImageObj) {
+                ctx.save();
+                ctx.translate(state.imgX, state.imgY);
+                ctx.scale(state.scale, state.scale);
+                ctx.drawImage(sourceImageObj, 0, 0);
+                ctx.restore();
+            }
 
-            ctx.save();
-            // Translate to center for scaling? No, simple top-left transform is easier for simple cropping
-            ctx.translate(imgX, imgY);
-            ctx.scale(scale, scale);
-            ctx.drawImage(currentImg, 0, 0);
-            ctx.restore();
+            // 2. Draw Grid (if visible)
+            if (state.isGridVisible) {
+                drawGridLayer();
+            }
+        }
 
-            // 3. Draw Grid
-            if (isGridVisible) {
-                const widthVal = parseFloat(document.getElementById('lineWidth').value) || 1; 
-                const color = document.getElementById('gridColor').value; 
-                const opacity = parseFloat(document.getElementById('gridOpacity').value) || 1;
-                const mode = modeSelect.value;
-                const showLabels = document.getElementById('showLabels').checked;
-                
-                // Get Grid Offsets
-                const gOffX = parseFloat(document.getElementById('gridOffsetX').value) || 0;
-                const gOffY = parseFloat(document.getElementById('gridOffsetY').value) || 0;
+        function drawGridLayer() {
+            // Parse Color & Opacity
+            const hex = state.color;
+            const r = parseInt(hex.substr(1,2), 16);
+            const g = parseInt(hex.substr(3,2), 16);
+            const b = parseInt(hex.substr(5,2), 16);
+            
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${state.opacity})`;
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${state.opacity})`;
+            ctx.lineWidth = state.thickness;
+            ctx.font = "bold 14px sans-serif";
+            ctx.textBaseline = "top";
 
-                // Parse Color to add Opacity
-                const r = parseInt(color.substr(1,2), 16);
-                const g = parseInt(color.substr(3,2), 16);
-                const b = parseInt(color.substr(5,2), 16);
-                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`; // For labels
-                ctx.lineWidth = widthVal; 
+            // Determine Step Size
+            let stepX, stepY;
+            if (state.gridMode === 'count') {
+                stepX = state.canvasW / state.cols;
+                stepY = state.canvasH / state.rows;
+            } else {
+                stepX = state.cellSize;
+                stepY = state.cellSize;
+            }
 
-                // Determine Step Sizes
-                let stepX, stepY;
+            // Offsets
+            const startX = (state.gridOffsetX % stepX) - stepX; // Start before edge to cover wrap
+            const startY = (state.gridOffsetY % stepY) - stepY;
 
-                if (mode === 'count') {
-                    const rows = parseInt(document.getElementById('rows').value) || 10;
-                    const cols = parseInt(document.getElementById('cols').value) || 10;
-                    // Note: If using offsets, simple division might drift, but it's acceptable here
-                    stepX = canvas.width / cols;
-                    stepY = canvas.height / rows;
-                } else {
-                    const size = parseFloat(document.getElementById('cellSize').value) || 50;
-                    stepX = size;
-                    stepY = size;
-                }
+            // Draw Verticals & Col Labels
+            let colIndexStart = Math.floor(-state.gridOffsetX / stepX) - 1; 
+            let colCount = 0;
 
-                // Calculate Start Points (to allow negative offset and wrapping)
-                // We want the grid to cover the whole canvas regardless of offset
-                let startX = (gOffX % stepX);
-                if (startX > 0) startX -= stepX; // Ensure we start drawing before the edge
-                
-                let startY = (gOffY % stepY);
-                if (startY > 0) startY -= stepY;
+            for (let x = startX; x <= state.canvasW; x += stepX) {
+                if (x >= -1) { // Avoid drawing far off screen
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, state.canvasH);
+                    ctx.stroke();
 
-                ctx.font = "bold 14px Arial";
-                ctx.textBaseline = "top";
-
-                // Draw Horizontal Lines & Row Labels
-                let rowCount = 0;
-                // Calculate the "Label Index" offset based on grid movement
-                let labelOffsetY = Math.floor(gOffY / stepY); 
-
-                for(let y = startY; y < canvas.height; y += stepY) {
-                    // Don't draw lines way off screen
-                    if (y > -stepY) {
-                        ctx.beginPath(); 
-                        ctx.moveTo(0, y); 
-                        ctx.lineTo(canvas.width, y); 
-                        ctx.stroke();
-
-                        if(showLabels && y >= 0) {
-                            // 1, 2, 3...
-                            let labelNum = rowCount - labelOffsetY;
-                            if (labelNum > 0) { // Optional: only show positive labels
-                                ctx.fillText(labelNum, 2, y + 2);
-                            }
+                    // Labels
+                    if (state.showLabels && x >= 0 && x < state.canvasW - 5) {
+                        let labelIdx = colCount + colIndexStart + 1;
+                        if (labelIdx >= 0) {
+                            let char = getExcelColName(labelIdx); 
+                            ctx.fillText(char, x + 4, 4);
                         }
                     }
-                    rowCount++;
                 }
+                colCount++;
+            }
 
-                // Draw Vertical Lines & Col Labels
-                let colCount = 0;
-                let labelOffsetX = Math.floor(gOffX / stepX);
+            // Draw Horizontals & Row Labels
+            let rowIndexStart = Math.floor(-state.gridOffsetY / stepY) - 1;
+            let rowCount = 0;
 
-                for(let x = startX; x < canvas.width; x += stepX) {
-                    if (x > -stepX) {
-                        ctx.beginPath(); 
-                        ctx.moveTo(x, 0); 
-                        ctx.lineTo(x, canvas.height); 
-                        ctx.stroke();
+            for (let y = startY; y <= state.canvasH; y += stepY) {
+                if (y >= -1) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(state.canvasW, y);
+                    ctx.stroke();
 
-                        if(showLabels && x >= 0) {
-                            // A, B, C...
-                            let labelIndex = colCount - labelOffsetX;
-                            if (labelIndex >= 0) {
-                                let labelChar = String.fromCharCode(65 + labelIndex); // 65 is 'A'
-                                // Handle AA, AB logic if you want, simpler for now:
-                                if(labelIndex > 25) labelChar = "?"; 
-                                ctx.fillText(labelChar, x + 2, 2);
-                            }
+                    if (state.showLabels && y >= 0 && y < state.canvasH - 5) {
+                        let labelNum = rowCount + rowIndexStart + 1;
+                        if (labelNum >= 0) {
+                            ctx.fillText(labelNum, 4, y + 4);
                         }
                     }
-                    colCount++;
+                }
+                rowCount++;
+            }
+        }
+
+        // Helper for A, B... AA, AB
+        function getExcelColName(n) {
+            let s = "";
+            while(n >= 0) {
+                s = String.fromCharCode((n % 26) + 65) + s;
+                n = Math.floor(n / 26) - 1;
+            }
+            return s;
+        }
+
+        /**
+         * PERSISTENCE & UTILS
+         */
+        
+        let saveTimeout;
+        function saveStateDebounced() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveState, 500);
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn("State too large to save (likely image data). Saving settings only.");
+                // Fallback: save everything except the massive image string
+                const liteState = { ...state, imgData: null };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(liteState));
+            }
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Merge saved state with defaults to handle version upgrades
+                    state = { ...state, ...parsed };
+                    
+                    updateUIFromState();
+                    
+                    if (state.imgData) {
+                        const img = new Image();
+                        img.onload = () => {
+                            sourceImageObj = img;
+                            draw();
+                        };
+                        img.src = state.imgData;
+                    }
+                } catch(e) {
+                    console.error("Failed to load state", e);
                 }
             }
         }
 
-        // 5. Download
-        function downloadImage() {
-            if(!currentImg) return alert("Please upload an image first!");
+        function updateUIFromState() {
+            // Update all input fields to match loaded state
+            document.getElementById('canvasW').value = state.canvasW;
+            document.getElementById('canvasH').value = state.canvasH;
+            document.getElementById('gridMode').value = state.gridMode;
+            document.getElementById('gridRows').value = state.rows;
+            document.getElementById('gridCols').value = state.cols;
+            document.getElementById('gridCellSize').value = state.cellSize;
+            document.getElementById('gridColor').value = state.color;
+            document.getElementById('gridThickness').value = state.thickness;
+            document.getElementById('gridOpacity').value = state.opacity;
+            document.getElementById('showLabels').checked = state.showLabels;
+            document.getElementById('gridOffsetX').value = state.gridOffsetX;
+            document.getElementById('gridOffsetY').value = state.gridOffsetY;
+            document.getElementById('imgScale').value = state.scale;
+            document.getElementById('opacityVal').innerText = Math.round(state.opacity * 100) + '%';
+            
+            toggleModeInputs();
+            const btn = document.getElementById('toggleGridBtn');
+            btn.innerText = state.isGridVisible ? "Hide Grid" : "Show Grid";
+        }
+
+        function clearData() {
+            if(confirm("This will remove the saved image and reset all settings. Continue?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        function downloadCanvas() {
             const link = document.createElement('a');
-            link.download = 'grid-artist-edit.png';
-            link.href = canvas.toDataURL();
+            link.download = 'grid-image.png';
+            link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
-        // 6. Theme Logic
         function toggleTheme() {
             const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            
-            if (currentTheme === 'dark') {
-                html.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            // Redraw to ensure text colors on canvas (if any are drawn) update? 
+            // Actually canvas colors are set in JS, we might need to redraw if we used theme variables inside canvas.
+            // Currently canvas text is drawn with specific colors, but the "No Image" text needs update.
+            draw(); 
+            if(!sourceImageObj) {
+                ctx.fillStyle = next === 'dark' ? '#333' : '#ddd';
+                ctx.font = "20px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Upload an image to begin", state.canvasW/2, state.canvasH/2);
             }
         }
     </script>
