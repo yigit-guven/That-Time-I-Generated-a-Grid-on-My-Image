@@ -104,6 +104,11 @@
             color: var(--text-color);
             padding: 5px 15px;
         }
+        
+        /* Toggle button style */
+        .toggle-btn {
+            background: #6c757d; /* Grey color for toggle */
+        }
 
         /* Canvas */
         canvas { 
@@ -155,6 +160,8 @@
         <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
 
         <button onclick="drawGrid()">Update Grid</button>
+        <button id="toggleBtn" class="toggle-btn" onclick="toggleGrid()">Hide Grid</button>
+        
         <button onclick="downloadImage()" style="background: #28a745;">Download Image</button>
     </div>
 
@@ -174,7 +181,9 @@
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const toggleBtn = document.getElementById('toggleBtn');
         let currentImg = null;
+        let isGridVisible = true; // Track grid state
 
         // 1. Handle Image Upload
         document.getElementById('upload').addEventListener('change', function(e) {
@@ -199,14 +208,32 @@
         document.getElementById('rows').addEventListener('input', drawGrid);
         document.getElementById('cols').addEventListener('input', drawGrid);
 
-        // 2. Draw Grid Logic
+        // 2. Toggle Logic
+        function toggleGrid() {
+            if (!currentImg) return;
+            
+            isGridVisible = !isGridVisible;
+            
+            // Update button text
+            if (isGridVisible) {
+                toggleBtn.innerText = "Hide Grid";
+                toggleBtn.style.opacity = "1";
+            } else {
+                toggleBtn.innerText = "Show Grid";
+                toggleBtn.style.opacity = "0.7";
+            }
+            
+            drawGrid();
+        }
+
+        // 3. Draw Grid Logic
         function drawGrid() {
             if (!currentImg) return;
             
             // Get input values
             const rows = parseInt(document.getElementById('rows').value) || 10;
             const cols = parseInt(document.getElementById('cols').value) || 10;
-            const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; // Get Line Width
+            const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; 
             const color = document.getElementById('gridColor').value; 
             
             // Resize canvas to match the image size
@@ -216,35 +243,39 @@
             // Draw the original image first
             ctx.drawImage(currentImg, 0, 0);
             
-            // Setup Line Style
-            ctx.strokeStyle = color; 
-            ctx.lineWidth = widthVal; // Use the specific pixel value from input
+            // Only draw lines if grid is visible
+            if (isGridVisible) {
+                // Setup Line Style
+                ctx.strokeStyle = color; 
+                ctx.lineWidth = widthVal; 
 
-            // Draw Horizontal Lines
-            const rowH = canvas.height / rows;
-            for(let i=1; i<rows; i++) {
-                ctx.beginPath(); 
-                ctx.moveTo(0, i * rowH); 
-                ctx.lineTo(canvas.width, i * rowH); 
-                ctx.stroke();
-            }
+                // Draw Horizontal Lines
+                const rowH = canvas.height / rows;
+                for(let i=1; i<rows; i++) {
+                    ctx.beginPath(); 
+                    ctx.moveTo(0, i * rowH); 
+                    ctx.lineTo(canvas.width, i * rowH); 
+                    ctx.stroke();
+                }
 
-            // Draw Vertical Lines
-            const colW = canvas.width / cols;
-            for(let i=1; i<cols; i++) {
-                ctx.beginPath(); 
-                ctx.moveTo(i * colW, 0); 
-                ctx.lineTo(i * colW, canvas.height); 
-                ctx.stroke();
+                // Draw Vertical Lines
+                const colW = canvas.width / cols;
+                for(let i=1; i<cols; i++) {
+                    ctx.beginPath(); 
+                    ctx.moveTo(i * colW, 0); 
+                    ctx.lineTo(i * colW, canvas.height); 
+                    ctx.stroke();
+                }
             }
         }
 
-        // 3. Download Logic
+        // 4. Download Logic
         function downloadImage() {
             if(!currentImg) return alert("Please upload an image first!");
             
             const link = document.createElement('a');
-            link.download = 'grid-generated-image.png';
+            // If grid is hidden, filename indicates clean image, otherwise grid image
+            link.download = isGridVisible ? 'grid-generated-image.png' : 'clean-image.png';
             link.href = canvas.toDataURL();
             link.click();
         }
