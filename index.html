@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>That Time I Generated a Grid on My Image</title>
+    <title>That Time I Generated a Grid on My Image (Artist Edition)</title>
     
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             
-            // If user saved 'dark', or hasn't saved anything but prefers dark OS theme
             if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
@@ -18,7 +17,7 @@
     </script>
 
     <style>
-        /* 1. Define Variables (Light Mode Default) */
+        /* 1. Define Variables */
         :root {
             --bg-color: #f0f0f0;
             --container-bg: #ffffff;
@@ -26,9 +25,9 @@
             --border-color: #cccccc;
             --shadow: rgba(0,0,0,0.1);
             --accent-color: #007bff;
+            --secondary-bg: #f8f9fa;
         }
 
-        /* 2. Define Dark Mode Overrides */
         [data-theme="dark"] {
             --bg-color: #1a1a1a;
             --container-bg: #2d2d2d;
@@ -36,14 +35,15 @@
             --border-color: #444444;
             --shadow: rgba(0,0,0,0.5);
             --accent-color: #4da3ff;
+            --secondary-bg: #3a3a3a;
         }
 
-        /* 3. Global Styles */
+        /* 2. Global Styles */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex; 
             flex-direction: column; 
-            min-height: 100vh; /* Ensures footer stays at bottom */
+            min-height: 100vh;
             align-items: center; 
             background: var(--bg-color); 
             color: var(--text-color);
@@ -55,11 +55,11 @@
         /* Header */
         .header {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 15px;
         }
@@ -67,42 +67,95 @@
         .header h1 { margin: 0; font-size: 1.5rem; } 
         .header span { font-size: 0.9rem; opacity: 0.7; }
 
-        /* Controls Area */
-        .controls { 
+        /* Controls Area - Grid Layout */
+        .controls-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .control-group { 
             background: var(--container-bg); 
-            padding: 20px; 
+            padding: 15px; 
             border-radius: 8px; 
-            box-shadow: 0 4px 15px var(--shadow); 
-            display: flex; 
-            gap: 15px; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            align-items: center; 
-            margin-bottom: 20px; 
+            box-shadow: 0 4px 10px var(--shadow); 
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         input, select { 
-            padding: 10px; 
+            padding: 8px; 
             border: 1px solid var(--border-color); 
             border-radius: 4px; 
-            background: var(--bg-color);
+            background: var(--secondary-bg);
             color: var(--text-color);
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Helper class to hide/show inputs without breaking UI style */
-        .hidden {
-            display: none !important;
+        input[type="number"] { font-variant-numeric: tabular-nums; }
+
+        /* Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
         }
 
-        /* Specific style for color picker */
+        /* Color Picker */
+        .color-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
         input[type="color"] {
             padding: 0;
-            width: 50px;
-            height: 40px;
+            width: 40px;
+            height: 35px;
             border: none;
             cursor: pointer;
             background: none;
         }
+
+        .hidden { display: none !important; }
 
         button { 
             padding: 10px 20px; 
@@ -112,6 +165,7 @@
             border-radius: 4px; 
             cursor: pointer; 
             font-weight: bold;
+            transition: opacity 0.2s;
         }
         button:hover { opacity: 0.9; }
 
@@ -122,10 +176,20 @@
             padding: 5px 15px;
         }
         
-        /* Toggle button style */
-        .toggle-btn {
-            background: #6c757d; /* Grey color for toggle */
+        .action-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--shadow);
         }
+
+        .toggle-btn { background: #6c757d; }
+        .download-btn { background: #28a745; }
 
         /* Canvas */
         canvas { 
@@ -133,6 +197,13 @@
             height: auto; 
             border: 1px solid var(--border-color); 
             box-shadow: 0 4px 20px var(--shadow); 
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
         /* Footer */
@@ -145,64 +216,104 @@
             opacity: 0.8;
             width: 100%;
             border-top: 1px solid var(--border-color);
-            line-height: 1.6;
         }
-
-        .footer a {
-            color: var(--accent-color);
-            text-decoration: none;
-            margin: 0 5px;
-        }
-        .footer a:hover { text-decoration: underline; }
+        .footer a { color: var(--accent-color); text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div>
-            <h1>That Time I Generated a Grid on My Image</h1>
-            <span>Open Source Grid Generator</span>
+            <h1>Grid Generator</h1>
+            <span>Artist Edition: Crop, Move & Align</span>
         </div>
         <button class="theme-btn" onclick="toggleTheme()">🌗 Theme</button>
     </div>
 
-    <div class="controls">
-        <input type="file" id="upload" accept="image/*">
+    <div class="controls-container">
         
-        <select id="gridMode" title="Calculation Mode">
-            <option value="count">Count (Rows/Cols)</option>
-            <option value="size">Size (Pixels)</option>
-        </select>
+        <div class="control-group">
+            <h3>1. Source</h3>
+            <input type="file" id="upload" accept="image/*">
+            <div class="input-row">
+                <label>Mode:</label>
+                <select id="gridMode" title="Calculation Mode">
+                    <option value="count">Count (Rows/Cols)</option>
+                    <option value="size">Size (Pixels)</option>
+                </select>
+            </div>
+            
+            <div id="inputs-count" class="input-row">
+                <input type="number" id="rows" placeholder="Rows" value="8" title="Rows (Y)">
+                <input type="number" id="cols" placeholder="Cols" value="8" title="Cols (X)">
+            </div>
+            <div id="inputs-size" class="input-row hidden">
+                <input type="number" id="cellSize" placeholder="Px Size" value="50" step="1" title="Cell Size (px)">
+            </div>
+        </div>
 
-        <span id="inputs-count" style="display: contents;">
-            <input type="number" id="rows" placeholder="Rows" value="10" style="width: 80px;" title="Rows (Y)">
-            <input type="number" id="cols" placeholder="Cols" value="10" style="width: 80px;" title="Cols (X)">
-        </span>
+        <div class="control-group">
+            <h3>2. Grid Style</h3>
+            <div class="color-wrapper">
+                <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
+                <input type="number" id="lineWidth" value="1" min="0.1" step="0.1" title="Line Thickness" style="width: 70px;">
+                <label>px</label>
+            </div>
+            
+            <div class="input-row">
+                <label>Opacity:</label>
+                <input type="range" id="gridOpacity" min="0.1" max="1" step="0.05" value="1">
+            </div>
 
-        <span id="inputs-size" class="hidden" style="display: contents;">
-            <input type="number" id="cellSize" placeholder="Px Size" value="32" step="0.1" style="width: 80px;" title="Cell Size (px)">
-        </span>
-        
-        <input type="number" id="lineWidth" placeholder="Width" value="1" min="0.1" step="0.1" style="width: 80px;" title="Line Width (px)">
+            <div class="input-row" style="justify-content: flex-start;">
+                <input type="checkbox" id="showLabels" style="width: auto; margin-right: 10px;">
+                <label for="showLabels">Show Axis Labels (A1, B2)</label>
+            </div>
+        </div>
 
-        <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
+        <div class="control-group">
+            <h3>3. Move Grid (Align)</h3>
+            <div class="input-row">
+                <label>X Offset:</label>
+                <input type="number" id="gridOffsetX" value="0" step="1" title="Shift Grid Left/Right">
+            </div>
+            <div class="input-row">
+                <label>Y Offset:</label>
+                <input type="number" id="gridOffsetY" value="0" step="1" title="Shift Grid Up/Down">
+            </div>
+            <button onclick="resetGridOffset()" style="padding: 5px; font-size: 0.8rem; background: var(--border-color); color: var(--text-color);">Reset Grid</button>
+        </div>
 
-        <button onclick="drawGrid()">Update Grid</button>
-        <button id="toggleBtn" class="toggle-btn" onclick="toggleGrid()">Hide Grid</button>
-        
-        <button onclick="downloadImage()" style="background: #28a745;">Download Image</button>
+        <div class="control-group">
+            <h3>4. Crop / Move Image</h3>
+            <div class="input-row">
+                <label>Scale:</label>
+                <input type="number" id="imgScale" value="1" step="0.01" min="0.1" title="Zoom Image">
+            </div>
+            <div class="input-row">
+                <label>Pos X:</label>
+                <input type="number" id="imgX" value="0" step="10" title="Move Image Left/Right">
+            </div>
+            <div class="input-row">
+                <label>Pos Y:</label>
+                <input type="number" id="imgY" value="0" step="10" title="Move Image Up/Down">
+            </div>
+            <button onclick="resetImageTransform()" style="padding: 5px; font-size: 0.8rem; background: var(--border-color); color: var(--text-color);">Reset Image</button>
+        </div>
+
+        <div class="action-bar">
+            <button onclick="drawGrid()">Update View</button>
+            <button id="toggleBtn" class="toggle-btn" onclick="toggleGrid()">Hide Grid</button>
+            <button onclick="downloadImage()" class="download-btn">Download Image</button>
+        </div>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <div class="footer">
+        <p>Open Source Grid Generator</p>
         <p>
-            Developed by <a href="https://github.com/yigit-guven" target="_blank">Yigit Guven</a><br>
-            Licensed by <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/LICENSE" target="_blank">MIT License</a>
-        </p>
-        <p>
-            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub Repo</a> |
-            <a href="SECURITY.md" target="_blank">Privacy & Security</a>
+            <a href="https://github.com/yigit-guven" target="_blank">Based on GitHub Repo</a>
         </p>
     </div>
 
@@ -213,7 +324,20 @@
         const modeSelect = document.getElementById('gridMode');
         
         let currentImg = null;
-        let isGridVisible = true; // Track grid state
+        let isGridVisible = true;
+        
+        // Listeners for all inputs
+        const inputs = [
+            'gridColor', 'lineWidth', 'rows', 'cols', 'cellSize', 'gridOpacity', 'showLabels',
+            'gridOffsetX', 'gridOffsetY',
+            'imgScale', 'imgX', 'imgY'
+        ];
+        
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', drawGrid);
+            if(el) el.addEventListener('change', drawGrid); // For checkbox/file
+        });
 
         // 1. Handle Image Upload
         document.getElementById('upload').addEventListener('change', function(e) {
@@ -225,6 +349,9 @@
                 const img = new Image();
                 img.onload = function() {
                     currentImg = img;
+                    // Reset Transforms on new image
+                    resetImageTransform();
+                    resetGridOffset();
                     drawGrid();
                 }
                 img.src = event.target.result;
@@ -232,13 +359,7 @@
             reader.readAsDataURL(file);
         });
 
-        // 1.5 Auto-update when inputs change
-        const inputs = ['gridColor', 'lineWidth', 'rows', 'cols', 'cellSize'];
-        inputs.forEach(id => {
-            document.getElementById(id).addEventListener('input', drawGrid);
-        });
-
-        // 2. Handle Mode Switching (UI Logic)
+        // 2. Mode Switching
         modeSelect.addEventListener('change', function() {
             const mode = this.value;
             const countInputs = document.getElementById('inputs-count');
@@ -254,13 +375,11 @@
             drawGrid();
         });
 
-        // 3. Toggle Logic
+        // 3. Helper Functions
         function toggleGrid() {
             if (!currentImg) return;
-            
             isGridVisible = !isGridVisible;
             
-            // Update button text
             if (isGridVisible) {
                 toggleBtn.innerText = "Hide Grid";
                 toggleBtn.style.opacity = "1";
@@ -268,75 +387,155 @@
                 toggleBtn.innerText = "Show Grid";
                 toggleBtn.style.opacity = "0.7";
             }
-            
             drawGrid();
         }
 
-        // 4. Draw Grid Logic
+        function resetGridOffset() {
+            document.getElementById('gridOffsetX').value = 0;
+            document.getElementById('gridOffsetY').value = 0;
+            drawGrid();
+        }
+
+        function resetImageTransform() {
+            document.getElementById('imgScale').value = 1;
+            document.getElementById('imgX').value = 0;
+            document.getElementById('imgY').value = 0;
+            drawGrid();
+        }
+
+        // 4. MAIN DRAW FUNCTION
         function drawGrid() {
             if (!currentImg) return;
-            
-            // Resize canvas to match the image size
+
+            // 1. Setup Canvas Dimensions
+            // The canvas size stays fixed to the original image dimensions
+            // unless we wanted to allow resizing the output. 
+            // For crop/move, we keep canvas = original img size, and move content inside.
             canvas.width = currentImg.width;
             canvas.height = currentImg.height;
-            
-            // Draw the original image first
+
+            // Clear Background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw Image (with Transforms)
+            const scale = parseFloat(document.getElementById('imgScale').value) || 1;
+            const imgX = parseFloat(document.getElementById('imgX').value) || 0;
+            const imgY = parseFloat(document.getElementById('imgY').value) || 0;
+
+            ctx.save();
+            // Translate to center for scaling? No, simple top-left transform is easier for simple cropping
+            ctx.translate(imgX, imgY);
+            ctx.scale(scale, scale);
             ctx.drawImage(currentImg, 0, 0);
-            
-            // Only draw lines if grid is visible
+            ctx.restore();
+
+            // 3. Draw Grid
             if (isGridVisible) {
                 const widthVal = parseFloat(document.getElementById('lineWidth').value) || 1; 
                 const color = document.getElementById('gridColor').value; 
+                const opacity = parseFloat(document.getElementById('gridOpacity').value) || 1;
                 const mode = modeSelect.value;
+                const showLabels = document.getElementById('showLabels').checked;
+                
+                // Get Grid Offsets
+                const gOffX = parseFloat(document.getElementById('gridOffsetX').value) || 0;
+                const gOffY = parseFloat(document.getElementById('gridOffsetY').value) || 0;
 
-                ctx.strokeStyle = color; 
+                // Parse Color to add Opacity
+                const r = parseInt(color.substr(1,2), 16);
+                const g = parseInt(color.substr(3,2), 16);
+                const b = parseInt(color.substr(5,2), 16);
+                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`; // For labels
                 ctx.lineWidth = widthVal; 
 
                 // Determine Step Sizes
                 let stepX, stepY;
 
                 if (mode === 'count') {
-                    // Logic: Total Rows/Cols
                     const rows = parseInt(document.getElementById('rows').value) || 10;
                     const cols = parseInt(document.getElementById('cols').value) || 10;
+                    // Note: If using offsets, simple division might drift, but it's acceptable here
                     stepX = canvas.width / cols;
                     stepY = canvas.height / rows;
                 } else {
-                    // Logic: Pixel Size
-                    const size = parseFloat(document.getElementById('cellSize').value) || 32;
+                    const size = parseFloat(document.getElementById('cellSize').value) || 50;
                     stepX = size;
                     stepY = size;
                 }
 
-                // Draw Horizontal Lines
-                for(let y = stepY; y < canvas.height; y += stepY) {
-                    ctx.beginPath(); 
-                    ctx.moveTo(0, y); 
-                    ctx.lineTo(canvas.width, y); 
-                    ctx.stroke();
+                // Calculate Start Points (to allow negative offset and wrapping)
+                // We want the grid to cover the whole canvas regardless of offset
+                let startX = (gOffX % stepX);
+                if (startX > 0) startX -= stepX; // Ensure we start drawing before the edge
+                
+                let startY = (gOffY % stepY);
+                if (startY > 0) startY -= stepY;
+
+                ctx.font = "bold 14px Arial";
+                ctx.textBaseline = "top";
+
+                // Draw Horizontal Lines & Row Labels
+                let rowCount = 0;
+                // Calculate the "Label Index" offset based on grid movement
+                let labelOffsetY = Math.floor(gOffY / stepY); 
+
+                for(let y = startY; y < canvas.height; y += stepY) {
+                    // Don't draw lines way off screen
+                    if (y > -stepY) {
+                        ctx.beginPath(); 
+                        ctx.moveTo(0, y); 
+                        ctx.lineTo(canvas.width, y); 
+                        ctx.stroke();
+
+                        if(showLabels && y >= 0) {
+                            // 1, 2, 3...
+                            let labelNum = rowCount - labelOffsetY;
+                            if (labelNum > 0) { // Optional: only show positive labels
+                                ctx.fillText(labelNum, 2, y + 2);
+                            }
+                        }
+                    }
+                    rowCount++;
                 }
 
-                // Draw Vertical Lines
-                for(let x = stepX; x < canvas.width; x += stepX) {
-                    ctx.beginPath(); 
-                    ctx.moveTo(x, 0); 
-                    ctx.lineTo(x, canvas.height); 
-                    ctx.stroke();
+                // Draw Vertical Lines & Col Labels
+                let colCount = 0;
+                let labelOffsetX = Math.floor(gOffX / stepX);
+
+                for(let x = startX; x < canvas.width; x += stepX) {
+                    if (x > -stepX) {
+                        ctx.beginPath(); 
+                        ctx.moveTo(x, 0); 
+                        ctx.lineTo(x, canvas.height); 
+                        ctx.stroke();
+
+                        if(showLabels && x >= 0) {
+                            // A, B, C...
+                            let labelIndex = colCount - labelOffsetX;
+                            if (labelIndex >= 0) {
+                                let labelChar = String.fromCharCode(65 + labelIndex); // 65 is 'A'
+                                // Handle AA, AB logic if you want, simpler for now:
+                                if(labelIndex > 25) labelChar = "?"; 
+                                ctx.fillText(labelChar, x + 2, 2);
+                            }
+                        }
+                    }
+                    colCount++;
                 }
             }
         }
 
-        // 5. Download Logic
+        // 5. Download
         function downloadImage() {
             if(!currentImg) return alert("Please upload an image first!");
-            
             const link = document.createElement('a');
-            link.download = isGridVisible ? 'grid-generated-image.png' : 'clean-image.png';
+            link.download = 'grid-artist-edit.png';
             link.href = canvas.toDataURL();
             link.click();
         }
 
-        // 6. Theme Logic (Persistent)
+        // 6. Theme Logic
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
