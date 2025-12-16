@@ -167,10 +167,10 @@
         </span>
 
         <span id="inputs-size" class="hidden" style="display: contents;">
-            <input type="number" id="cellSize" placeholder="Px Size" value="32" style="width: 80px;" title="Cell Size (px)">
+            <input type="number" id="cellSize" placeholder="Px Size" value="32" step="0.1" style="width: 80px;" title="Cell Size (px)">
         </span>
         
-        <input type="number" id="lineWidth" placeholder="Width" value="1" min="1" style="width: 80px;" title="Line Width (px)">
+        <input type="number" id="lineWidth" placeholder="Width" value="1" min="0.1" step="0.1" style="width: 80px;" title="Line Width (px)">
 
         <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
 
@@ -185,7 +185,7 @@
     <div class="footer">
         <p>
             Developed by <a href="https://github.com/yigit-guven" target="_blank">Yigit Guven</a><br>
-            Licensed by <a href="LICENSE" target="_blank">MIT License</a>
+            Licensed by <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image/blob/main/LICENSE" target="_blank">MIT License</a>
         </p>
         <p>
             <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub Repo</a> |
@@ -272,7 +272,8 @@
             
             // Only draw lines if grid is visible
             if (isGridVisible) {
-                const widthVal = parseInt(document.getElementById('lineWidth').value) || 1; 
+                // UPDATED: Changed parseInt to parseFloat so decimals (0.2) work
+                const widthVal = parseFloat(document.getElementById('lineWidth').value) || 1; 
                 const color = document.getElementById('gridColor').value; 
                 const mode = modeSelect.value;
 
@@ -290,7 +291,8 @@
                     stepY = canvas.height / rows;
                 } else {
                     // Logic: Pixel Size
-                    const size = parseInt(document.getElementById('cellSize').value) || 32;
+                    // UPDATED: Changed parseInt to parseFloat for specific pixel sizes (e.g. 32.5px)
+                    const size = parseFloat(document.getElementById('cellSize').value) || 32;
                     stepX = size;
                     stepY = size;
                 }
