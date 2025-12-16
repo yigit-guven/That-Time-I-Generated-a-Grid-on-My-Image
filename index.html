@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>That Time I Generated a Grid on My Image</title>
+    <script src="theme.js"></script> 
+    <style>
+        /* 1. Define Variables (Light Mode Default) */
+        :root {
+            --bg-color: #f0f0f0;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --shadow: rgba(0,0,0,0.1);
+            --accent-color: #007bff;
+        }
+
+        /* 2. Define Dark Mode Overrides */
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #444444;
+            --shadow: rgba(0,0,0,0.5);
+            --accent-color: #4da3ff;
+        }
+
+        /* 3. Global Styles */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; /* Ensures footer stays at bottom */
+            align-items: center; 
+            background: var(--bg-color); 
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px; 
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        .header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .header h1 { margin: 0; font-size: 1.5rem; } /* Slightly smaller font for long title */
+        .header span { font-size: 0.9rem; opacity: 0.7; }
+
+        /* Controls Area */
+        .controls { 
+            background: var(--container-bg); 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px var(--shadow); 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+
+        input { 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Specific style for color picker */
+        input[type="color"] {
+            padding: 0;
+            width: 50px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        button { 
+            padding: 10px 20px; 
+            background: var(--accent-color); 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        button:hover { opacity: 0.9; }
+
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            padding: 5px 15px;
+        }
+
+        /* Canvas */
+        canvas { 
+            max-width: 100%; 
+            height: auto; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 20px var(--shadow); 
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto; 
+            padding-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            line-height: 1.6;
+        }
+
+        .footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>That Time I Generated a Grid on My Image</h1>
+            <span>Open Source Grid Generator</span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">🌗 Theme</button>
+    </div>
+
+    <div class="controls">
+        <input type="file" id="upload" accept="image/*">
+        
+        <input type="number" id="rows" placeholder="Rows" value="10" style="width: 80px;" title="Rows (Y)">
+        <input type="number" id="cols" placeholder="Cols" value="10" style="width: 80px;" title="Cols (X)">
+        
+        <input type="color" id="gridColor" value="#ff0000" title="Grid Color">
+
+        <button onclick="drawGrid()">Update Grid</button>
+        <button onclick="downloadImage()" style="background: #28a745;">Download Image</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="footer">
+        <p>
+            Developed by <a href="https://github.com/yigit-guven" target="_blank">Yigit Guven</a><br>
+            Licensed by <a href="LICENSE" target="_blank">MIT License</a>
+        </p>
+        <p>
+            <a href="https://github.com/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image" target="_blank">GitHub Repo</a> |
+            <a href="SECURITY.md" target="_blank">Privacy & Security</a>
+        </p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let currentImg = null;
+
+        // 1. Handle Image Upload
+        document.getElementById('upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImg = img;
+                    drawGrid();
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // 1.5 Auto-update when color changes
+        document.getElementById('gridColor').addEventListener('input', drawGrid);
+
+        // 2. Draw Grid Logic
+        function drawGrid() {
+            if (!currentImg) return;
+            
+            // Get input values
+            const rows = parseInt(document.getElementById('rows').value) || 10;
+            const cols = parseInt(document.getElementById('cols').value) || 10;
+            const color = document.getElementById('gridColor').value; 
+            
+            // Resize canvas to match the image size
+            canvas.width = currentImg.width;
+            canvas.height = currentImg.height;
+            
+            // Draw the original image first
+            ctx.drawImage(currentImg, 0, 0);
+            
+            // Setup Line Style
+            ctx.strokeStyle = color; 
+            ctx.lineWidth = Math.max(1, currentImg.width / 500); 
+
+            // Draw Horizontal Lines
+            const rowH = canvas.height / rows;
+            for(let i=1; i<rows; i++) {
+                ctx.beginPath(); 
+                ctx.moveTo(0, i * rowH); 
+                ctx.lineTo(canvas.width, i * rowH); 
+                ctx.stroke();
+            }
+
+            // Draw Vertical Lines
+            const colW = canvas.width / cols;
+            for(let i=1; i<cols; i++) {
+                ctx.beginPath(); 
+                ctx.moveTo(i * colW, 0); 
+                ctx.lineTo(i * colW, canvas.height); 
+                ctx.stroke();
+            }
+        }
+
+        // 3. Download Logic
+        function downloadImage() {
+            if(!currentImg) return alert("Please upload an image first!");
+            
+            const link = document.createElement('a');
+            // Updated filename to match project vibe
+            link.download = 'grid-generated-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
