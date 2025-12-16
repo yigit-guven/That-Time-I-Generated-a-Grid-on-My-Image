@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>That Time I Generated a Grid on My Image</title>
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // If user saved 'dark', or hasn't saved anything but prefers dark OS theme
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <style>
         /* 1. Define Variables (Light Mode Default) */
         :root {
@@ -272,7 +285,6 @@
             
             // Only draw lines if grid is visible
             if (isGridVisible) {
-                // UPDATED: Changed parseInt to parseFloat so decimals (0.2) work
                 const widthVal = parseFloat(document.getElementById('lineWidth').value) || 1; 
                 const color = document.getElementById('gridColor').value; 
                 const mode = modeSelect.value;
@@ -291,14 +303,12 @@
                     stepY = canvas.height / rows;
                 } else {
                     // Logic: Pixel Size
-                    // UPDATED: Changed parseInt to parseFloat for specific pixel sizes (e.g. 32.5px)
                     const size = parseFloat(document.getElementById('cellSize').value) || 32;
                     stepX = size;
                     stepY = size;
                 }
 
                 // Draw Horizontal Lines
-                // Start at stepY to avoid drawing on the very top edge
                 for(let y = stepY; y < canvas.height; y += stepY) {
                     ctx.beginPath(); 
                     ctx.moveTo(0, y); 
@@ -307,7 +317,6 @@
                 }
 
                 // Draw Vertical Lines
-                // Start at stepX to avoid drawing on the very left edge
                 for(let x = stepX; x < canvas.width; x += stepX) {
                     ctx.beginPath(); 
                     ctx.moveTo(x, 0); 
@@ -322,18 +331,23 @@
             if(!currentImg) return alert("Please upload an image first!");
             
             const link = document.createElement('a');
-            // If grid is hidden, filename indicates clean image, otherwise grid image
             link.download = isGridVisible ? 'grid-generated-image.png' : 'clean-image.png';
             link.href = canvas.toDataURL();
             link.click();
         }
 
-        // 6. Theme Logic (Inline for safety)
+        // 6. Theme Logic (Persistent)
         function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
         }
     </script>
 </body>
