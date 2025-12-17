@@ -3,7 +3,7 @@
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![License](https://img.shields.io/github/license/yigit-guven/That-Time-I-Generated-a-Grid-on-My-Image)
 ![Language](https://img.shields.io/badge/language-HTML5%20%7C%20JS-yellow)
-![Platform](https://img.shields.io/badge/platform-Web%20%7C%20Desktop-blue)
+![Platform](https://img.shields.io/badge/platform-Web-blue)
 
 **A blazing-fast, privacy-focused tool for overlaying customizable grids on images directly in your browser.**
 
