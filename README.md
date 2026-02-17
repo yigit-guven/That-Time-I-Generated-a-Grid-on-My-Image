@@ -46,7 +46,7 @@ This project is built with a focus on performance, simplicity, and modern web st
 You can use the application directly via the web or run it locally.
 
 ### 🌐 Live Demo
-**[Launch the App](https://yigit-guven.github.io/That-Time-I-Generated-a-Grid-on-My-Image/)**
+**[Launch the App](https://yigitguven.net/that-time-i-generated-a-grid-on-my-image/)**
 
 ### 💻 Local Installation
 
